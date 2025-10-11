@@ -49,3 +49,10 @@ Commits that don't follow the conventional format will cause CI to fail.
 
 - [Conventional Commits Specification](https://www.conventionalcommits.org/)
 - [Commitlint Documentation](https://commitlint.js.org/)
+
+## Note for Contributors
+
+All pull requests must have appropriate labels set for CI to pass. Required labels:
+- One from Type: Easy/Medium/Hard
+- One from Semver: Major/Minor/Patch
+- PR:Accept
