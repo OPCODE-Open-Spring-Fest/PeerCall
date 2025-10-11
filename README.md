@@ -271,16 +271,13 @@ Please read our [Contribution Guide](./CONTRIBUTING.md) for detailed instruction
 
 ## Project Governance
 
-Community-driven with maintainer oversight. Contributions, discussions, and feedback are welcomed to shape project direction.
-
+Community-driven with maintainer oversight. Contributions, discussions, and feedback are welcomed to shape project direction.Please star the repo
 ---
 
 ## Maintainers & Contact
 
-- Project Manager: [@your-github-handle](https://github.com/your-github-handle)  
-- Backend Maintainer: [@backend-dev](https://github.com/backend-dev)  
-- Frontend Maintainer: [@frontend-dev](https://github.com/frontend-dev)  
-- Security Contact: [security@yourdomain.com](mailto:security@yourdomain.com)  
+- Project Manager: [@04shubham7](https://github.com/04shubham7)  
+
 
 ---
 
