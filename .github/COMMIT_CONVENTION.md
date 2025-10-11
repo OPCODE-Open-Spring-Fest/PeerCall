@@ -39,3 +39,8 @@ fix(api): resolve null pointer exception in user endpoint
 
 All commits are validated using commitlint with the conventional config.
 See `commitlint.config.js` for configuration details.
+
+## CI Integration
+
+The commitlint validation runs automatically on all pull requests and push events.
+Commits that don't follow the conventional format will cause CI to fail.
