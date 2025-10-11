@@ -44,3 +44,8 @@ See `commitlint.config.js` for configuration details.
 
 The commitlint validation runs automatically on all pull requests and push events.
 Commits that don't follow the conventional format will cause CI to fail.
+
+## Resources
+
+- [Conventional Commits Specification](https://www.conventionalcommits.org/)
+- [Commitlint Documentation](https://commitlint.js.org/)
