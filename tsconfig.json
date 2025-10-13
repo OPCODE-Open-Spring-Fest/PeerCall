@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "module": "ESNext", // or "ES6"
-    "moduleResolution": "Node",
-    "jsx": "react-jsx", // for React 17+
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
-  }
-}
