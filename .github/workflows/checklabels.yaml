@@ -16,6 +16,6 @@ jobs:
       - name: Install dependencies
         run: npm install @actions/github @actions/core
       - name: Run Label Checker
-        run: node .github/workflows/label-checker.cjs
+        run: node .github/workflows/label-checker.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

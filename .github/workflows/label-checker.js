@@ -1,10 +1,10 @@
-const { getOctokit, context } = require('@actions/github');
-const { setFailed } = require('@actions/core');
+import { getOctokit, context } from '@actions/github';
+import { setFailed } from '@actions/core';
 
 async function run() {
   try {
     const token = process.env.GITHUB_TOKEN;
-    const octokit = getOctokit(token);
+    const octokit = new getOctokit(token);
 
     const pullRequest = context.payload.pull_request;
     const owner = pullRequest.base.repo.owner.login;
