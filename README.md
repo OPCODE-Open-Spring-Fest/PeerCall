@@ -201,7 +201,7 @@ Open [http://localhost:5173](http://localhost:5173) to view the app.
 
 Please read our [Contribution Guide](./CONTRIBUTING.md) for detailed instructions. Quick start:
 
-1. Pick an issue labelled `good first issue` or `help wanted`.  
+1. Pick an issue labelled `good first issue` or `help wanted` and add proper descritpion of your apporach and how you want to contribute.
 2. Fork and create a feature branch: `git checkout -b feat/awesome-feature`  
 3. Commit often with clear, conventional commit messages.  
 4. Run tests and linting locally before PR.  
@@ -237,8 +237,8 @@ Please read our [Contribution Guide](./CONTRIBUTING.md) for detailed instruction
 
 ## How to Test
 
-- [ ] CI passes
-- [ ] Code style \& tests updated
+- [x] CI passes
+- [x] Code style \& tests updated
 
 ```
 
