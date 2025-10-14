@@ -41,7 +41,7 @@ const TechStack = () => {
           {techCategories.map((category, index) => (
             <Card
               key={index}
-              className="p-6 bg-gradient-card border-border hover:shadow-card transition-all duration-300 hover:-translate-y-1 group animate-fade-in-up"
+              className="p-6 bg-gradient-card border-border hover:shadow-card transition-all duration-300 hover:bg-primary/10 hover:-translate-y-1 group animate-fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="mb-4 inline-block p-3 bg-background rounded-lg group-hover:text-primary transition-all">
