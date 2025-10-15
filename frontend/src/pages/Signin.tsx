@@ -39,13 +39,13 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4 py-8">
-      <Card className="w-full max-w-md shadow-card">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+      <Card className="w-full max-w-md bg-white shadow-lg rounded-xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-primary">
+          <CardTitle className="text-3xl font-bold text-green-600">
             PeerCall
           </CardTitle>
-          <CardDescription className="text-base">
+          <CardDescription className="text-gray-600 text-base">
             Sign in to your account
           </CardDescription>
         </CardHeader>
@@ -83,7 +83,7 @@ const SignIn = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-green-600 text-white hover:bg-green-700 transition-colors rounded-lg py-3"
               size="lg"
               disabled={isLoading}
             >
@@ -99,17 +99,18 @@ const SignIn = () => {
           </form>
 
           <div className="mt-4 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500">
               Demo credentials: demo@peercall.com / password123
             </p>
           </div>
         </CardContent>
+
         <CardFooter className="flex flex-col space-y-2">
-          <div className="text-sm text-muted-foreground text-center">
+          <div className="text-sm text-gray-500 text-center">
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="text-primary hover:underline font-medium transition-colors"
+              className="text-green-600 hover:underline font-medium transition-colors"
             >
               Sign Up
             </Link>
