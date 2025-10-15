@@ -1,5 +1,6 @@
 import { Shield, Video, MessageSquare, Smartphone, Lock, Users } from "lucide-react";
 import { Card } from "./ui/card";
+
 const features = [
   {
     icon: Shield,
@@ -35,16 +36,16 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-secondary/30">
+    <section id="features" className="py-24 bg-gray-50">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 animate-fade-in-up">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Powerful{" "}
-            <span className="bg-gradient-primary bg-clip-text text-primary">
+            <span className="text-green-600">
               Features
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Everything you need for secure, private video communication
           </p>
         </div>
@@ -53,16 +54,16 @@ const Features = () => {
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="p-8 hover:shadow-elevated transition-all duration-300 hover:-translate-y-2 bg-card border-border group animate-fade-in-up"
+              className="p-8 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="mb-4 inline-block p-3 bg-gradient-card rounded-lg group-hover:scale-110 transition-transform">
-                <feature.icon className="w-8 h-8 text-primary" />
+              <div className="mb-4 inline-block p-3 bg-green-100 rounded-lg group-hover:scale-110 transition-transform">
+                <feature.icon className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">
                 {feature.title}
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-gray-600 leading-relaxed">
                 {feature.description}
               </p>
             </Card>
