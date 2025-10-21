@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "ESNext", // or "ES6"
-    "moduleResolution": "Node",
+    "module": "Node16", // or "ES6"
+    "moduleResolution": "node16",
     "jsx": "react-jsx", // for React 17+
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
