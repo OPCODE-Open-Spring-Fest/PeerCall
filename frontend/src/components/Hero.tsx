@@ -1,18 +1,16 @@
-import { Button } from "./ui/button";
+import { Button } from "./ui/button.js";
 import { ArrowRight, Play } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
-  const scrollToJoin = () => {
-    const element = document.getElementById("join");
-    if (element) element.scrollIntoView({ behavior: "smooth" });
-  };
+  const navigate = useNavigate();
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gray-50 text-gray-900">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-pink-200 to-blue-500 opacity-10 animate-gradient-shift bg-[length:200%_200%]" />
+  <div className="absolute inset-0 bg-linear-to-br from-green-500 via-pink-200 to-blue-500 opacity-10 animate-gradient-shift bg-size-[200%_200%]" />
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-gray-50/80 to-gray-50" />
+  <div className="absolute inset-0 bg-linear-to-b from-gray-50/50 via-gray-50/80 to-gray-50" />
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -29,7 +27,7 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button onClick={scrollToJoin} className="group bg-green-700 text-white hover:bg-purple-700">
+              <Button onClick={() => navigate("/signup")} className="group bg-green-700 text-white hover:bg-purple-700">
                 Join Now
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/ui/button.js";
+import { useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,7 +58,7 @@ function Header() {
             <Button
               size="default"
               className="bg-green-600 text-white hover:bg-green-700"
-              onClick={() => scrollToSection("join")}
+              onClick={() => navigate("/signup")}
             >
               Join Now
             </Button>
@@ -90,7 +92,7 @@ function Header() {
             <Button
               size="default"
               className="w-full bg-green-600 text-white hover:bg-green-700"
-              onClick={() => scrollToSection("join")}
+              onClick={() => navigate("/signup")}
             >
               Join Now
             </Button>
