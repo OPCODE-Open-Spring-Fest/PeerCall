@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { InputField } from "../components/InputField";
-import { toast } from "../hooks/use-toast";
-import { mockLogin, SignInData } from "../lib/api";
+import { Button } from "../components/ui/button.js"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card.js";
+import { InputField } from "../components/InputField.js";
+import { toast } from "../hooks/use-toast.js";
+import { mockLogin, SignInData } from "../lib/api.js";
 import { Loader2 } from "lucide-react";
+import SocialLogin from "../components/SocialLogin.js";
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +27,7 @@ const SignIn = () => {
         description: response.message,
       });
       reset();
-      // Navigate to dashboard or home page here
+      // Navigate home page
     } catch (error: any) {
       toast({
         title: "Error",
@@ -97,11 +98,9 @@ const SignIn = () => {
               )}
             </Button>
           </form>
-
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-500">
-              Demo credentials: demo@peercall.com / password123
-            </p>
+          <div className="mt-6">
+            <div className="text-center text-sm text-gray-500 mb-3">Or continue with</div>
+            <SocialLogin />
           </div>
         </CardContent>
 
