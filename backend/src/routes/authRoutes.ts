@@ -1,12 +1,24 @@
 import express from "express";
-import { registerUser, loginUser,  getUserProfile } from "../controllers/authController.js";
+import {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  handleRefreshToken,
+  logoutUser,
+  oauthCallback,
+
+} from "../controllers/authController.js";
+
 import passport from "passport";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Auth
 router.post("/signup", registerUser);
 router.post("/signin", loginUser);
+router.post("/logout", logoutUser); // <-- ADDED
+router.get("/refresh", handleRefreshToken); // <-- ADDED
 router.get("/me", protect, getUserProfile);
 
 // Google OAuth
@@ -16,8 +28,13 @@ router.get(
 );
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/signin` : "/signin" }),
-  oauthCallback
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: process.env.FRONTEND_URL
+      ? `${process.env.FRONTEND_URL}/signin`
+      : "/signin",
+  }),
+  oauthCallback // <-- UPDATED
 );
 
 // GitHub OAuth
@@ -27,8 +44,13 @@ router.get(
 );
 router.get(
   "/github/callback",
-  passport.authenticate("github", { session: false, failureRedirect: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/signin` : "/signin" }),
-  oauthCallback
+  passport.authenticate("github", {
+    session: false,
+    failureRedirect: process.env.FRONTEND_URL
+      ? `${process.env.FRONTEND_URL}/signin`
+      : "/signin",
+  }),
+  oauthCallback // <-- UPDATED
 );
 
 export default router;
