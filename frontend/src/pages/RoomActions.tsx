@@ -23,7 +23,6 @@ export default function RoomActions() {
         });
         setUser(res.data.user);
       } catch (err) {
-        // invalid token or user not found
         localStorage.removeItem("token");
         navigate("/signin");
       } finally {
@@ -41,34 +40,46 @@ export default function RoomActions() {
     navigate("/");
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100">
+        <p className="text-gray-600 text-lg animate-pulse">Loading...</p>
+      </div>
+    );
 
   return (
-    <div className="container mx-auto px-6 py-10">
-      <div className="max-w-md mx-auto bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4 ">Room Actions</h2>
-        <p className="text-sm text-gray-600 mb-6">Hello {user?.name ?? "user"}, choose an action:</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-8">
+      <div className="max-w-md w-full bg-white/80 backdrop-blur-md shadow-xl rounded-2xl border border-green-100 p-8 transition-transform hover:scale-[1.01] duration-300">
+        <h2 className="text-3xl font-bold text-green-600 text-center mb-4">
+          Room Actions
+        </h2>
+        <p className="text-gray-600 text-center mb-8">
+          👋 Hello <span className="font-semibold">{user?.name ?? "Guest"}</span>, what would you like to do today?
+        </p>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
+          {/* Join Room */}
           <Button
-            className="w-full justify-center bg-green-600 hover:bg-green-700 text-white"
             onClick={handleJoin}
+            className="w-full justify-center bg-green-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all"
           >
-            <LogIn className="mr-2 h-4 w-4" /> Join Room
+            <LogIn className="mr-2 h-5 w-5" /> Join a Room
           </Button>
 
+          {/* Create Room */}
           <Button
-            className="w-full justify-center bg-blue-600 hover:bg-blue-700 text-white"
             onClick={handleCreate}
+            className="w-full justify-center bg-blue-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all"
           >
-            <PlusSquare className="mr-2 h-4 w-4" /> Create Room
+            <PlusSquare className="mr-2 h-5 w-5" /> Create a Room
           </Button>
 
+          {/* Logout */}
           <Button
-            className="w-full justify-center bg-red-600 hover:bg-red-700 text-white"
             onClick={handleLogout}
+            className="w-full justify-center bg-red-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all"
           >
-            <LogOut className="mr-2 h-4 w-4" /> Logout
+            <LogOut className="mr-2 h-5 w-5" /> Logout
           </Button>
         </div>
       </div>
