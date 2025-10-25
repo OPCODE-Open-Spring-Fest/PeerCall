@@ -1,37 +1,56 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { Button } from "../components/ui/button.js"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card.js";
-import { InputField } from "../components/InputField.js";
-import { toast } from "../hooks/use-toast.js";
-import { mockLogin, SignInData } from "../lib/api.js";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { InputField } from "../components/InputField";
+import { toast } from "../hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import SocialLogin from "../components/SocialLogin.js";
+import SocialLogin from "../components/SocialLogin";
+
+interface SignInData {
+  email: string;
+  password: string;
+}
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<SignInData>();
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<SignInData>();
 
   const onSubmit = async (data: SignInData) => {
     setIsLoading(true);
     try {
-      const response = await mockLogin(data);
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/signin",
+        { email: data.email, password: data.password },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
       toast({
         title: "Welcome back!",
-        description: response.message,
+        description: response.data.message || "Login successful",
       });
+
+      // store JWT token in localStorage
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
       reset();
-      // Navigate home page
+      navigate("/"); // redirect to home/dashboard
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Login failed. Please try again.",
+        description: error.response?.data?.message || "Login failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -50,6 +69,7 @@ const SignIn = () => {
             Sign in to your account
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <InputField
@@ -98,8 +118,11 @@ const SignIn = () => {
               )}
             </Button>
           </form>
+
           <div className="mt-6">
-            <div className="text-center text-sm text-gray-500 mb-3">Or continue with</div>
+            <div className="text-center text-sm text-gray-500 mb-3">
+              Or continue with
+            </div>
             <SocialLogin />
           </div>
         </CardContent>

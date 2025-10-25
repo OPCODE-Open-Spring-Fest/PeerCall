@@ -1,9 +1,39 @@
 import { Button } from "./ui/button.js";
 import { ArrowRight, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleJoinNow = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await axios.get("http://localhost:3000/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res?.data?.user) {
+        navigate("/room-actions");
+      } else {
+        localStorage.removeItem("token");
+        navigate("/signin");
+      }
+    } catch (err) {
+      localStorage.removeItem("token");
+      navigate("/signin");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gray-50 text-gray-900">
@@ -27,8 +57,8 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button onClick={() => navigate("/signup")} className="group bg-green-700 text-white hover:bg-purple-700">
-                Join Now
+              <Button onClick={handleJoinNow} disabled={loading} className="group bg-green-700 text-white hover:bg-purple-700">
+                {loading ? 'Checking...' : 'Join Now'}
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
 

@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { InputField } from "../components/InputField";
 import { toast } from "../hooks/use-toast";
-import { mockRegister, SignUpData } from "../lib/api";
 import { Loader2 } from "lucide-react";
 
 interface SignUpFormData {
@@ -16,6 +23,8 @@ interface SignUpFormData {
 
 const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -27,18 +36,49 @@ const SignUp = () => {
   const password = watch("password");
 
   const onSubmit = async (data: SignUpFormData) => {
+    if (data.password !== data.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await mockRegister(data);
+      // Derive name from email (part before @)
+      const name = data.email.split("@")[0];
+
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/signup",
+        {
+          name,
+          email: data.email,
+          password: data.password,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
       toast({
         title: "Success!",
-        description: response.message,
+        description: response.data.message || "Registration successful",
       });
+
+      // Optional: save token for auto-login
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
       reset();
+      navigate("/signin");
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Registration failed. Please try again.",
+        description:
+          error.response?.data?.message || "Registration failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -57,6 +97,7 @@ const SignUp = () => {
             Create your account to get started
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <InputField
@@ -96,8 +137,6 @@ const SignUp = () => {
               placeholder="••••••••"
               {...register("confirmPassword", {
                 required: "Please confirm your password",
-                validate: (value) =>
-                  value === password || "Passwords do not match",
               })}
               error={errors.confirmPassword?.message}
             />
