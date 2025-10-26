@@ -36,9 +36,13 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     const typedUser = asTypedUser(newUser);
 
     const token = generateToken(typedUser._id.toString());
-const decoded = jwt.decode(token) as { exp?: number };
-const expiresAt = new Date((decoded.exp ?? 0) * 1000);
+const decoded = jwt.decode(token) as { exp?: number } | null;
 
+if (!decoded || !decoded.exp) {
+  throw new Error("Invalid token format or missing expiration");
+}
+
+const expiresAt = new Date(decoded.exp * 1000);
 await Session.create({
   userId: typedUser._id,
   token,
@@ -85,8 +89,13 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     const typedUser = asTypedUser(foundUser);
 
       const token = generateToken(typedUser._id.toString());
-const decoded = jwt.decode(token) as { exp?: number };
-const expiresAt = new Date((decoded.exp ?? 0) * 1000);
+const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { exp?: number };
+
+if (!decoded.exp) {
+  throw new Error("Token missing expiration claim");
+}
+
+const expiresAt = new Date(decoded.exp * 1000);
 
 await Session.create({
   userId: typedUser._id,
