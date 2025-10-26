@@ -18,7 +18,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     }
 
    
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string; exp: number };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
 
    
     const activeSession = await Session.findOne({ token });
