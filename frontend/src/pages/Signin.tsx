@@ -24,7 +24,12 @@ interface SignInData {
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<SignInData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<SignInData>();
 
   const onSubmit = async (data: SignInData) => {
     setIsLoading(true);
@@ -40,7 +45,6 @@ const SignIn = () => {
         description: response.data.message || "Login successful",
       });
 
-      // store JWT token in localStorage
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
@@ -50,7 +54,9 @@ const SignIn = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Login failed. Please try again.",
+        description:
+          error.response?.data?.message ||
+          "Login failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -59,19 +65,19 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <Card className="w-full max-w-md bg-white shadow-lg rounded-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-8">
+      <Card className="w-full max-w-md bg-white/80 backdrop-blur-md shadow-xl border border-green-100 rounded-2xl p-6 animate-fadeIn">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold text-green-600">
+          <CardTitle className="text-4xl font-extrabold text-green-600 tracking-tight">
             PeerCall
           </CardTitle>
           <CardDescription className="text-gray-600 text-base">
-            Sign in to your account
+            Sign in to continue to your account
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <InputField
               label="Email"
               id="email"
@@ -104,13 +110,13 @@ const SignIn = () => {
 
             <Button
               type="submit"
-              className="w-full bg-green-600 text-white hover:bg-green-700 transition-colors rounded-lg py-3"
+              className="w-full bg-green-600 text-white hover:bg-green-700 transition-all duration-300 rounded-lg py-3 font-medium shadow-md hover:shadow-lg"
               size="lg"
               disabled={isLoading}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Signing in...
                 </>
               ) : (
@@ -119,20 +125,20 @@ const SignIn = () => {
             </Button>
           </form>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <div className="text-center text-sm text-gray-500 mb-3">
-              Or continue with
+              — Or continue with —
             </div>
             <SocialLogin />
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="text-sm text-gray-500 text-center">
-            Don't have an account?{" "}
+        <CardFooter className="flex flex-col space-y-2 mt-4">
+          <div className="text-sm text-gray-600 text-center">
+            Don’t have an account?{" "}
             <Link
               to="/signup"
-              className="text-green-600 hover:underline font-medium transition-colors"
+              className="text-green-600 font-medium hover:underline hover:text-green-700 transition-colors"
             >
               Sign Up
             </Link>
