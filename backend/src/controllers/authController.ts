@@ -200,7 +200,7 @@ export const handleRefreshToken = async (
 
     const refreshToken = cookies.jwt;
     // Clear the old cookie immediately
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "strict", secure: true });
+    res.clearCookie("jwt", { httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV !== "development" });
 
     const foundUser = await User.findOne({ refreshTokens: refreshToken });
 
