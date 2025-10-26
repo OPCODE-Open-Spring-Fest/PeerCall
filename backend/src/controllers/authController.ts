@@ -165,10 +165,16 @@ export const oauthCallback = async (
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Instead of sending JSON, we redirect to the frontend
-    // We'll pass the access token as a query param (or hash) for the frontend to store
-    // This is one common pattern.
-    const redirectUrl = `${process.env.FRONTEND_URL}/auth-success?token=${accessToken}`;
+    // Set the access token in a secure, HTTP-only cookie
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes, adjust as needed
+    });
+
+    // Redirect to the frontend without passing the token in the URL
+    const redirectUrl = `${process.env.FRONTEND_URL}/auth-success`;
     res.redirect(redirectUrl);
 
   } catch (err) {
