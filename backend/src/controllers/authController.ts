@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
-import User, { type IUser } from "../models/userModel.js"; 
+import User, { type IUser } from "../models/userModel.js";
 import { generateToken } from "../utils/generateToken.js";
 import { userSchema, loginSchema } from "../utils/validateInputs.js";
 import dotenv from "dotenv";
@@ -10,7 +10,7 @@ import { Session } from "../models/sessionModel.js";
 dotenv.config();
 const asTypedUser = (user: any): IUser & { _id: string } => user as IUser & { _id: string };
 
-//signup controller
+// ✅ SIGNUP CONTROLLER
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parseResult = userSchema.safeParse(req.body);
@@ -21,10 +21,15 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
       });
     }
 
-    const { name, email, password } = parseResult.data;
+    const { email, password } = parseResult.data;
+
+    // ✅ Auto-derive name from email
+    const name = email.split("@")[0];
+
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+    if (existingUser) {
       return res.status(400).json({ success: false, message: "Email already registered" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ name, email, password: hashedPassword });
@@ -50,7 +55,7 @@ await Session.create({
   }
 };
 
-//sign in controller
+// ✅ LOGIN CONTROLLER (same as before)
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parseResult = loginSchema.safeParse(req.body);
@@ -65,6 +70,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     const foundUser = await User.findOne({ email });
     if (!foundUser)
       return res.status(400).json({ success: false, message: "Invalid credentials" });
+
     if (!foundUser.password || foundUser.password === "") {
       return res.status(400).json({
         success: false,
@@ -99,22 +105,27 @@ await Session.create({
   }
 };
 
-//OAuth callback handler
-export const oauthCallback = (req: Request & { user?: any }, res: Response) => {
+// ✅ GET PROFILE CONTROLLER (unchanged)
+export const getUserProfile = async (req: Request, res: Response) => {
   try {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const user = req.user as IUser & { _id: string } | undefined;
+    const user = await User.findById(req.userId).select("-password");
 
     if (!user) {
-      return res.redirect(`${frontendUrl}/signin?error=oauth_failed`);
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    const token = generateToken(user._id.toString());
-    const redirectUrl = `${frontendUrl}/oauth-success#token=${token}`;
-
-    return res.redirect(redirectUrl);
-  } catch (err) {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    return res.redirect(`${frontendUrl}/signin?error=server_error`);
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };

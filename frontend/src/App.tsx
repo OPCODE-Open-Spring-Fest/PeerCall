@@ -7,6 +7,7 @@ import Index from "./pages/Index.js";
 import SignUp from "./pages/Signup.js";
 import SignIn from "./pages/Signin.js";
 import OAuthSuccess from "./pages/OAuthSuccess.js";
+import RoomActions from "./pages/RoomActions.js";
 import "./index.css"
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/room-actions" element={<RoomActions />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
         </Routes>
       </BrowserRouter>

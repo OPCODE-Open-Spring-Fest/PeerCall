@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, oauthCallback } from "../controllers/authController.js";
+import { registerUser, loginUser,  getUserProfile} from "../controllers/authController.js";
 import passport from "passport";
 import { Session } from "../models/sessionModel.js";
 import {protect} from "../middleware/authMiddleware.js";
@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post("/signup", registerUser);
 router.post("/signin", loginUser);
+router.get("/me", protect, getUserProfile);
 
 router.post("/logout", protect, async (req, res) => {
   try {
@@ -37,7 +38,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { session: false, failureRedirect: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/signin` : "/signin" }),
-  oauthCallback
+ 
 );
 
 // GitHub OAuth
@@ -48,7 +49,7 @@ router.get(
 router.get(
   "/github/callback",
   passport.authenticate("github", { session: false, failureRedirect: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/signin` : "/signin" }),
-  oauthCallback
+  
 );
 
 export default router;
