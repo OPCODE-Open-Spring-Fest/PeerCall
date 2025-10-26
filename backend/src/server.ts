@@ -4,6 +4,8 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import dotenv from "dotenv";
 import cors from "cors";
+import cron from "node-cron";
+import { Session } from "./models/sessionModel.js";
 import { ChatMessage } from "./models/chatMessageModel.js"; // <-- make sure this file exists and exports model
 import app from "./app.js";
 
@@ -101,6 +103,20 @@ mongoose
   .connect(MONGO_URI)
   .then(() => {
     console.log("🗄️  MongoDB connected successfully!");
+
+
+    cron.schedule("0 2 * * *", async () => {
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() - 7);
+      try {
+        const result = await Session.deleteMany({ createdAt: { $lt: expiryDate } });
+        console.log(`🧹 Cleanup complete — ${result.deletedCount} expired sessions removed`);
+      } catch (error) {
+        console.error("❌ Session cleanup failed:", error);
+      }
+    });
+
+
     httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📡 Socket.io real-time chat ready`);

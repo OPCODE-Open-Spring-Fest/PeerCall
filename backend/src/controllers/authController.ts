@@ -4,6 +4,8 @@ import User, { type IUser } from "../models/userModel.js";
 import { generateToken } from "../utils/generateToken.js";
 import { userSchema, loginSchema } from "../utils/validateInputs.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import { Session } from "../models/sessionModel.js";
 
 dotenv.config();
 const asTypedUser = (user: any): IUser & { _id: string } => user as IUser & { _id: string };
@@ -28,10 +30,20 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     const newUser = await User.create({ name, email, password: hashedPassword });
     const typedUser = asTypedUser(newUser);
 
+    const token = generateToken(typedUser._id.toString());
+const decoded = jwt.decode(token) as { exp?: number };
+const expiresAt = new Date((decoded.exp ?? 0) * 1000);
+
+await Session.create({
+  userId: typedUser._id,
+  token,
+  expiresAt,
+});
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token: generateToken(typedUser._id.toString()),
+      token,
     });
   } catch (err) {
     next(err);
@@ -66,10 +78,21 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
     const typedUser = asTypedUser(foundUser);
 
+      const token = generateToken(typedUser._id.toString());
+const decoded = jwt.decode(token) as { exp?: number };
+const expiresAt = new Date((decoded.exp ?? 0) * 1000);
+
+await Session.create({
+  userId: typedUser._id,
+  token,
+  expiresAt,
+});
+
+
     res.json({
       success: true,
       message: "Login successful",
-      token: generateToken(typedUser._id.toString()),
+      token,
     });
   } catch (err) {
     next(err);
