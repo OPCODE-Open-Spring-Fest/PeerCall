@@ -13,7 +13,6 @@ const parseExpiration = (val: string | undefined, fallback: number | string): nu
 };
 
 export const generateAccessToken = (id: string) => {
-    // console.log(accessTokenSecret)
     if (!accessTokenSecret) throw new Error("JWT_ACCESS_SECRET is not defined");
 
     const options = {
