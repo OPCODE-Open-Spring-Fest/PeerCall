@@ -72,7 +72,6 @@ export const registerUser = async (
     const typedUser = asTypedUser(newUser);
 
     // Generate and send tokens
-    await typedUser.save(); // Save the new user before sending tokens
     sendTokens(res, typedUser);
   } catch (err) {
     next(err);
