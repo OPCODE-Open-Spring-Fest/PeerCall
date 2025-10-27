@@ -8,10 +8,12 @@ import SignUp from "./pages/Signup.js";
 import SignIn from "./pages/Signin.js";
 import OAuthSuccess from "./pages/OAuthSuccess.js";
 import RoomActions from "./pages/RoomActions.js";
+import ErrorBoundary from "./components/ErrorBoundary.js";
 import "./index.css"
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -27,6 +29,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+      </ErrorBoundary>
 );
 
 export default App;
