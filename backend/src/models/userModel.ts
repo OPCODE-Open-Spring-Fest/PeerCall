@@ -6,6 +6,7 @@ export interface IUser extends Document {
   password?: string; // optional for SSO users
   ssoProvider?: string; // "google" or "github"
   ssoId?: string;
+  refreshTokens?: string[]; // <-- ADDED: To store valid refresh tokens
   createdAt: Date;
 }
 
@@ -16,6 +17,7 @@ const userSchema: Schema<IUser> = new Schema(
     password: { type: String, default: "" }, // empty for SSO accounts
     ssoProvider: { type: String, enum: ["google", "github"], default: null },
     ssoId: { type: String, default: null },
+    refreshTokens: [{ type: String }], // <-- ADDED
   },
   { timestamps: true }
 );

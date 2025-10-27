@@ -5,8 +5,11 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Auth
 router.post("/signup", registerUser);
 router.post("/signin", loginUser);
+router.post("/logout", logoutUser); // <-- ADDED
+router.get("/refresh", handleRefreshToken); // <-- ADDED
 router.get("/me", protect, getUserProfile);
 
 // Google OAuth
