@@ -23,6 +23,8 @@ interface SignUpFormData {
 
 const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [serverMessage, setServerMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -42,13 +44,15 @@ const SignUp = () => {
         description: "Passwords do not match",
         variant: "destructive",
       });
+      setServerMessage("Passwords do not match");
+      setIsError(true);
       return;
     }
 
     setIsLoading(true);
+    setServerMessage(null);
     try {
       const name = data.email.split("@")[0];
-
       const response = await axios.post(
         "http://localhost:3000/api/auth/signup",
         {
@@ -67,29 +71,35 @@ const SignUp = () => {
           response.data.message || "Account created successfully. Welcome!",
       });
 
+      setServerMessage("Account created successfully! Redirecting...");
+      setIsError(false);
+
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
 
       reset();
-      navigate("/signin");
+      setTimeout(() => navigate("/signin"), 1500);
     } catch (error: any) {
+      const msg =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
       toast({
         title: "Error",
-        description:
-          error.response?.data?.message ||
-          "Registration failed. Please try again.",
+        description: msg,
         variant: "destructive",
       });
+      setServerMessage(msg);
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-8">
-      <Card className="w-full max-w-md bg-white/80 backdrop-blur-md shadow-xl border border-green-100 rounded-2xl p-6 animate-fadeIn">
-        <CardHeader className="space-y-1 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-10 sm:px-6">
+      <Card className="w-full max-w-md bg-white/90 backdrop-blur-xl shadow-2xl border border-green-100 rounded-2xl p-6 sm:p-8 animate-fadeIn">
+        <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-4xl font-extrabold text-green-600 tracking-tight">
             PeerCall
           </CardTitle>
@@ -98,7 +108,20 @@ const SignUp = () => {
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="mt-2">
+          {/* Message Area (prevents layout shift) */}
+          {serverMessage && (
+            <div
+              className={`text-center text-sm mb-4 px-3 py-2 rounded-lg transition-all duration-300 ${
+                isError
+                  ? "bg-red-50 text-red-600 border border-red-200"
+                  : "bg-green-50 text-green-700 border border-green-200"
+              }`}
+            >
+              {serverMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <InputField
               label="Email"
@@ -143,7 +166,7 @@ const SignUp = () => {
 
             <Button
               type="submit"
-              className="w-full bg-green-600 text-white hover:bg-green-700 transition-all duration-300 rounded-lg py-3 font-medium shadow-md hover:shadow-lg"
+              className="w-full bg-green-600 text-white hover:bg-green-700 transition-all duration-300 rounded-lg py-3 font-medium shadow-md hover:shadow-lg flex items-center justify-center"
               size="lg"
               disabled={isLoading}
             >
@@ -159,7 +182,7 @@ const SignUp = () => {
           </form>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-2 mt-4">
+        <CardFooter className="flex flex-col space-y-3 mt-5">
           <div className="text-sm text-gray-600 text-center">
             Already have an account?{" "}
             <Link

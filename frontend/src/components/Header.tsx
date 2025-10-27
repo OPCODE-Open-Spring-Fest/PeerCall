@@ -1,28 +1,26 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button.js";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, PlusSquare, LogIn, LogOut } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import axios from "axios";
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<{ _id: string; name: string } | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Scroll effect
+  // Scroll shadow effect
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fetch authenticated user
+  // Fetch logged-in user
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     const fetchUser = async () => {
       try {
         const res = await axios.get("http://localhost:3000/api/auth/me", {
@@ -30,111 +28,146 @@ function Header() {
         });
         setUser(res.data.user);
       } catch {
+        localStorage.removeItem("token");
         setUser(null);
-        localStorage.removeItem("token"); // remove invalid token
       }
     };
-
     fetchUser();
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+  // Scroll to section smoothly
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
       setIsMobileMenuOpen(false);
     }
   };
 
-  // Navigate to a separate page which provides actions (join/create/logout)
   const handleJoinNow = () => {
-    if (!user) {
-      navigate("/signin");
-    } else {
-      navigate("/room-actions");
-    }
+    if (!user) navigate("/signin");
+    else navigate("/room-actions");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
-    setIsDropdownOpen(false);
     navigate("/");
   };
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/80 backdrop-blur-lg shadow-lg" : "bg-transparent"
+        isScrolled
+          ? "bg-white/70 backdrop-blur-md shadow-md"
+          : "bg-transparent"
       }`}
     >
-      <nav className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <a href="/" className="text-2xl font-bold text-green-600 bg-clip-text">
-            PeerCall
-          </a>
+      <nav
+  className={`flex items-center justify-between w-full px-4 sm:px-6 py-3 md:py-4 max-w-[100vw] mx-auto`}
+>
+  {/* Logo aligned to extreme left */}
+  <a
+    href="/"
+    className="text-2xl md:text-3xl font-extrabold text-green-600 tracking-tight"
+  >
+    PeerCall
+  </a>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8 relative">
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-gray-900 hover:text-green-600 transition-colors font-medium"
-            >
-              Features
-            </button>
-            <button
-              onClick={() => scrollToSection("tech-stack")}
-              className="text-gray-900 hover:text-green-600 transition-colors font-medium"
-            >
-              Tech Stack
-            </button>
-            <div className="relative">
-              <Button
-                size="default"
-                className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2"
-                onClick={handleJoinNow}
-              >
-                Join Now
-              </Button>
-            </div>
-          </div>
+  {/* Desktop Navigation */}
+  <div className="hidden md:flex items-center gap-8">
+    <button
+      onClick={() => scrollToSection("features")}
+      className="text-gray-800 hover:text-green-600 transition-colors font-medium"
+    >
+      Features
+    </button>
+    <button
+      onClick={() => scrollToSection("tech-stack")}
+      className="text-gray-800 hover:text-green-600 transition-colors font-medium"
+    >
+      Tech Stack
+    </button>
 
-          {/* Mobile Menu Button */}
+    {user ? (
+      <div className="flex items-center gap-4">
+        <span className="text-gray-700 font-medium">
+          Hi, {user.name.split(" ")[0]}
+        </span>
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="border-green-600 text-green-600 hover:bg-green-50"
+        >
+          Logout
+        </Button>
+      </div>
+    ) : (
+      <Button
+        onClick={handleJoinNow}
+        className="bg-green-600 text-white hover:bg-green-700"
+      >
+        Join Now
+      </Button>
+    )}
+  </div>
+
+  {/* Mobile Menu Button */}
+  <button
+    className="md:hidden text-gray-800 focus:outline-none"
+    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+    aria-label="Toggle menu"
+  >
+    {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+  </button>
+</nav>
+
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md shadow-lg transform transition-all duration-300 origin-top ${
+          isMobileMenuOpen
+            ? "opacity-100 scale-y-100 visible"
+            : "opacity-0 scale-y-0 invisible"
+        }`}
+      >
+        <div className="flex flex-col px-6 py-4 space-y-4">
           <button
-            className="md:hidden text-gray-900"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
+            onClick={() => scrollToSection("features")}
+            className="text-gray-800 hover:text-green-600 text-lg text-left font-medium"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            Features
           </button>
-        </div>
+          <button
+            onClick={() => scrollToSection("tech-stack")}
+            className="text-gray-800 hover:text-green-600 text-lg text-left font-medium"
+          >
+            Tech Stack
+          </button>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-4 animate-fade-in">
-            <button
-              onClick={() => scrollToSection("features")}
-              className="block w-full text-left text-gray-900 hover:text-green-600 transition-colors font-medium py-2"
-            >
-              Features
-            </button>
-            <button
-              onClick={() => scrollToSection("tech-stack")}
-              className="block w-full text-left text-gray-900 hover:text-green-600 transition-colors font-medium py-2"
-            >
-              Tech Stack
-            </button>
+          {user ? (
+            <>
+              <span className="text-gray-700 font-medium">
+                Hello, {user.name.split(" ")[0]}
+              </span>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="border-green-600 text-green-600 hover:bg-green-50"
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
             <Button
-              size="default"
-              className="w-full bg-green-600 text-white hover:bg-green-700 flex items-center justify-center gap-2"
               onClick={handleJoinNow}
+              className="bg-green-600 text-white hover:bg-green-700 w-full"
             >
               Join Now
             </Button>
-            {/* mobile: action buttons moved to /room-actions page */}
-          </div>
-        )}
-      </nav>
+          )}
+        </div>
+      </div>
     </header>
   );
 }
