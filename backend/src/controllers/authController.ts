@@ -19,12 +19,8 @@ const sendTokens = (res: Response, user: IUser & { _id: string }) => {
   const newRefreshToken = generateRefreshToken(user._id.toString());
 
   // Update user's refresh tokens in DB
-  // For simplicity, we'll allow one refresh token per user.
-  // For multiple devices, you'd push to this array.
-  // On login, we'll clear old ones.
+  // Only one refresh token per user is supported (single device).
   user.refreshTokens = [newRefreshToken];
-  // To support multiple devices:
-  // user.refreshTokens = user.refreshTokens ? [...user.refreshTokens, newRefreshToken] : [newRefreshToken];
 
   // Set refresh token in secure httpOnly cookie
   res.cookie("jwt", newRefreshToken, {
