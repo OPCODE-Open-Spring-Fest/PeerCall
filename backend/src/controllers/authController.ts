@@ -288,7 +288,7 @@ export const logoutUser = async (
   try {
     const cookies = req.cookies;
     if (!cookies?.jwt) {
-      return res.status(204).json({ success: true, message: "No content" }); // No cookie, already logged out
+      return res.sendStatus(204); // No cookie, already logged out
     }
 
     const refreshToken = cookies.jwt;
