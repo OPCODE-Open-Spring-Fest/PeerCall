@@ -144,7 +144,6 @@ export const oauthCallback = async (
     }
 
     const typedFoundUser = asTypedUser(foundUser);
-    await typedFoundUser.save();
 
     // We send tokens the same way, but redirect the user
     const accessToken = generateAccessToken(typedFoundUser._id.toString());
