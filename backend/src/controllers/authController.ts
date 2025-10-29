@@ -8,6 +8,8 @@ import {
 } from "../utils/generateToken.js";
 import { userSchema, loginSchema } from "../utils/validateInputs.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import { Session } from "../models/sessionModel.js";
 
 dotenv.config();
 const asTypedUser = (user: any): IUser & { _id: string } =>
@@ -67,8 +69,25 @@ export const registerUser = async (
     const newUser = await User.create({ name, email, password: hashedPassword });
     const typedUser = asTypedUser(newUser);
 
-    // Generate and send tokens
-    sendTokens(res, typedUser);
+    const token = generateToken(typedUser._id.toString());
+const decoded = jwt.decode(token) as { exp?: number } | null;
+
+if (!decoded || !decoded.exp) {
+  throw new Error("Invalid token format or missing expiration");
+}
+
+const expiresAt = new Date(decoded.exp * 1000);
+await Session.create({
+  userId: typedUser._id,
+  token,
+  expiresAt,
+});
+
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token,
+    });
   } catch (err) {
     next(err);
   }
@@ -112,59 +131,26 @@ export const loginUser = async (
 
     const typedUser = asTypedUser(foundUser);
 
-    // Generate and send tokens
-    await typedUser.save(); // Save any potential changes (like refresh tokens)
-    sendTokens(res, typedUser);
-  } catch (err) {
-    next(err);
-  }
-};
+      const token = generateToken(typedUser._id.toString());
+const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { exp?: number };
 
-// ✅ OAUTH CALLBACK CONTROLLER (New)
-export const oauthCallback = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "Authentication failed" });
-    }
+if (!decoded.exp) {
+  throw new Error("Token missing expiration claim");
+}
 
-    const typedUser = asTypedUser(req.user);
+const expiresAt = new Date(decoded.exp * 1000);
 
-    // We get the user profile from passport's `done` function
-    // (which you'd have in src/utils/passport.ts)
-    // Now we just generate and send tokens
+await Session.create({
+  userId: typedUser._id,
+  token,
+  expiresAt,
+});
 
-    // Find the user in DB (req.user is from passport)
-    const foundUser = await User.findById(typedUser._id);
-    if (!foundUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
 
-    const typedFoundUser = asTypedUser(foundUser);
-
-    // We send tokens the same way, but redirect the user
-    const accessToken = generateAccessToken(typedFoundUser._id.toString());
-    const newRefreshToken = generateRefreshToken(typedFoundUser._id.toString());
-
-    typedFoundUser.refreshTokens = [newRefreshToken];
-    await typedFoundUser.save();
-
-    res.cookie("jwt", newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    // Set the access token in a secure, HTTP-only cookie
-    res.cookie("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes, adjust as needed
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
     });
 
     // Redirect to the frontend without passing the token in the URL
