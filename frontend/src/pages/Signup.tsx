@@ -21,6 +21,8 @@ interface SignUpFormData {
   confirmPassword: string;
 }
 
+const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
+
 const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -50,7 +52,7 @@ const SignUp = () => {
       const name = data.email.split("@")[0];
 
       const response = await axios.post(
-        "http://localhost:3000/api/auth/signup",
+        `${API_URL}/api/auth/signup`,
         {
           name,
           email: data.email,
@@ -58,6 +60,7 @@ const SignUp = () => {
         },
         {
           headers: { "Content-Type": "application/json" },
+          withCredentials: true,
         }
       );
 
@@ -67,8 +70,9 @@ const SignUp = () => {
           response.data.message || "Account created successfully. Welcome!",
       });
 
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      const token = response.data.accessToken || response.data.token;
+      if (token) {
+        localStorage.setItem("token", token);
       }
 
       reset();

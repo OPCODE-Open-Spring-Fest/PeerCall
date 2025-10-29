@@ -1,46 +1,41 @@
 import type { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"; // <-- ADDED
+import jwt from "jsonwebtoken";
 import User, { type IUser } from "../models/userModel.js";
 import {
-  generateAccessToken, // <-- RENAMED/UPDATED
-  generateRefreshToken, // <-- ADDED
+  generateToken,
+  generateRefreshToken,
 } from "../utils/generateToken.js";
 import { userSchema, loginSchema } from "../utils/validateInputs.js";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import { Session } from "../models/sessionModel.js";
 
 dotenv.config();
+
 const asTypedUser = (user: any): IUser & { _id: string } =>
   user as IUser & { _id: string };
 
-// A helper function to send tokens
-const sendTokens = (res: Response, user: IUser & { _id: string }) => {
-  const accessToken = generateAccessToken(user._id.toString());
-  const newRefreshToken = generateRefreshToken(user._id.toString());
-
-  // Update user's refresh tokens in DB
-  // Only one refresh token per user is supported (single device).
-  user.refreshTokens = [newRefreshToken];
-
-  // Set refresh token in secure httpOnly cookie
-  res.cookie("jwt", newRefreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== "development",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matches token expiry)
-  });
-
-  // Send access token in response body
-  res.json({
-    success: true,
-    message: "Login successful",
-    accessToken: accessToken,
-  });
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV !== "development",
+  sameSite: "strict" as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
-// ✅ SIGNUP CONTROLLER (Updated)
+async function createSessionForAccessToken(userId: string, token: string) {
+  const decoded = jwt.decode(token) as { exp?: number } | null;
+  const expiresAt = decoded?.exp
+    ? new Date(decoded.exp * 1000)
+    : new Date(Date.now() + 15 * 60 * 1000);
+
+  await Session.create({
+    userId,
+    token,
+    expiresAt,
+  });
+}
+
+//signup controller
 export const registerUser = async (
   req: Request,
   res: Response,
@@ -69,31 +64,29 @@ export const registerUser = async (
     const newUser = await User.create({ name, email, password: hashedPassword });
     const typedUser = asTypedUser(newUser);
 
-    const token = generateToken(typedUser._id.toString());
-const decoded = jwt.decode(token) as { exp?: number } | null;
+    // Generate tokens
+    const accessToken = generateToken(typedUser._id.toString());
+    const refreshToken = generateRefreshToken(typedUser._id.toString());
 
-if (!decoded || !decoded.exp) {
-  throw new Error("Invalid token format or missing expiration");
-}
+    typedUser.refreshTokens = [refreshToken];
+    await typedUser.save();
 
-const expiresAt = new Date(decoded.exp * 1000);
-await Session.create({
-  userId: typedUser._id,
-  token,
-  expiresAt,
-});
+    res.cookie("jwt", refreshToken, cookieOptions);
+
+    //a session document 
+    await createSessionForAccessToken(typedUser._id.toString(), accessToken);
 
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token,
+      accessToken,
     });
   } catch (err) {
     next(err);
   }
 };
 
-// ✅ LOGIN CONTROLLER (Updated)
+//login controller
 export const loginUser = async (
   req: Request,
   res: Response,
@@ -131,40 +124,31 @@ export const loginUser = async (
 
     const typedUser = asTypedUser(foundUser);
 
-      const token = generateToken(typedUser._id.toString());
-const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { exp?: number };
+    // Generate tokens
+    const accessToken = generateToken(typedUser._id.toString());
+    const refreshToken = generateRefreshToken(typedUser._id.toString());
 
-if (!decoded.exp) {
-  throw new Error("Token missing expiration claim");
-}
+    // Store refresh token
+    typedUser.refreshTokens = [refreshToken];
+    await typedUser.save();
 
-const expiresAt = new Date(decoded.exp * 1000);
+    // Set cookie
+    res.cookie("jwt", refreshToken, cookieOptions);
 
-await Session.create({
-  userId: typedUser._id,
-  token,
-  expiresAt,
-});
+    // Create session
+    await createSessionForAccessToken(typedUser._id.toString(), accessToken);
 
-
-    res.json({
+    return res.json({
       success: true,
       message: "Login successful",
-      token,
+      accessToken,
     });
-
-    // Redirect to the frontend without passing the token in the URL
-    const redirectUrl = `${process.env.FRONTEND_URL}/auth-success`;
-    res.redirect(redirectUrl);
-
   } catch (err) {
     next(err);
   }
 };
 
-// ... (keep all other functions as they are)
-
-// ✅ REFRESH TOKEN CONTROLLER (Updated with fixes)
+//refresh token controller
 export const handleRefreshToken = async (
   req: Request,
   res: Response,
@@ -180,11 +164,14 @@ export const handleRefreshToken = async (
 
     const refreshToken = cookies.jwt;
     // Clear the old cookie immediately
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV !== "development" });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV !== "development",
+    });
 
     const foundUser = await User.findOne({ refreshTokens: refreshToken });
 
-    // Detected refresh token reuse!
     if (!foundUser) {
       try {
         const decoded = jwt.verify(
@@ -192,15 +179,13 @@ export const handleRefreshToken = async (
           process.env.JWT_REFRESH_SECRET as string
         ) as { id: string };
 
-        // We know who the user is, now we hack-proof them
-        // by deleting all their refresh tokens
         const compromisedUser = await User.findById(decoded.id);
         if (compromisedUser) {
           compromisedUser.refreshTokens = [];
           await compromisedUser.save();
         }
       } catch (err) {
-        // Token was invalid in the first place
+        // nothing to do
       } finally {
         return res
           .status(403)
@@ -208,48 +193,35 @@ export const handleRefreshToken = async (
       }
     }
 
-    // Valid token, let's rotate it
     const typedUser = asTypedUser(foundUser);
 
     try {
-      // Verify the token is still valid
+      // Verify
       jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as {
         id: string;
       };
 
       // Generate new tokens
-      const newAccessToken = generateAccessToken(typedUser._id.toString());
+      const newAccessToken = generateToken(typedUser._id.toString());
       const newRefreshToken = generateRefreshToken(typedUser._id.toString());
 
-      // ==================
-      //      FIX #1
-      // ==================
-      // Filter out the old token and default to an empty array
       const otherRefreshTokens =
         typedUser.refreshTokens?.filter((rt) => rt !== refreshToken) || [];
 
-      // Assign the new array (filtered list + new token)
       typedUser.refreshTokens = [...otherRefreshTokens, newRefreshToken];
       await typedUser.save();
 
-      // Send new tokens
-      res.cookie("jwt", newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      //new refresh cookie
+      res.cookie("jwt", newRefreshToken, cookieOptions);
 
-      res.json({
+      //new session
+      await createSessionForAccessToken(typedUser._id.toString(), newAccessToken);
+
+      return res.json({
         success: true,
         accessToken: newAccessToken,
       });
     } catch (err) {
-      // Token expired or invalid
-      // ==================
-      //      FIX #2
-      // ==================
-      // Clear out the bad token, default to an empty array
       typedUser.refreshTokens =
         typedUser.refreshTokens?.filter((rt) => rt !== refreshToken) || [];
       await typedUser.save();
@@ -263,8 +235,7 @@ export const handleRefreshToken = async (
   }
 };
 
-
-// ✅ LOGOUT CONTROLLER (Updated with fix)
+//logout controller
 export const logoutUser = async (
   req: Request,
   res: Response,
@@ -272,40 +243,39 @@ export const logoutUser = async (
 ) => {
   try {
     const cookies = req.cookies;
-    if (!cookies?.jwt) {
-      return res.sendStatus(204); // No cookie, already logged out
+    const authHeader = req.headers.authorization;
+    const accessToken = authHeader?.split(" ")[1];
+
+    // If cookie exists- remove refresh token
+    if (cookies?.jwt) {
+      const refreshToken = cookies.jwt;
+      const foundUser = await User.findOne({ refreshTokens: refreshToken });
+      if (foundUser) {
+        foundUser.refreshTokens =
+          foundUser.refreshTokens?.filter((rt) => rt !== refreshToken) || [];
+        await foundUser.save();
+      }
+
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV !== "development",
+      });
+    }
+    if (accessToken) {
+      await Session.deleteOne({ token: accessToken });
     }
 
-    const refreshToken = cookies.jwt;
-
-    // Find user and remove this specific refresh token
-    const foundUser = await User.findOne({ refreshTokens: refreshToken });
-    if (foundUser) {
-      foundUser.refreshTokens =
-        foundUser.refreshTokens?.filter((rt) => rt !== refreshToken) || [];
-
-      await foundUser.save();
-    }
-
-    // Clear the cookie
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV !== "development",
-    });
-
-    res.status(200).json({ success: true, message: "Logged out successfully" });
+    return res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (err) {
     next(err);
   }
 };
 
-// ✅ GET PROFILE CONTROLLER (Unchanged, but for completeness)
+ //get profile controller
 export const getUserProfile = async (req: Request, res: Response) => {
   try {
-    // req.userId comes from the 'protect' middleware
-    // @ts-ignore
-    const user = await User.findById(req.userId).select("-password -refreshTokens");
+    const user = await User.findById((req as any).userId).select("-password -refreshTokens");
 
     if (!user) {
       return res.status(404).json({
