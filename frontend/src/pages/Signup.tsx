@@ -44,8 +44,9 @@ const SignUp = () => {
         description: "Passwords do not match",
         variant: "destructive",
       });
-      setServerMessage("Passwords do not match");
-      setIsError(true);
+      // Removed duplicated inline error message for password mismatch
+      // setServerMessage("Passwords do not match");
+      // setIsError(true);
       return;
     }
 
