@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser,  getUserProfile} from "../controllers/authController.js";
+import { registerUser, loginUser,  getUserProfile, logoutUser,handleRefreshToken} from "../controllers/authController.js";
 import passport from "passport";
 import { Session } from "../models/sessionModel.js";
 import {protect} from "../middleware/authMiddleware.js";

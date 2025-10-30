@@ -3,12 +3,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"; // <-- ADDED
 import User, { type IUser } from "../models/userModel.js";
 import {
+  generateToken,
   generateAccessToken, // <-- RENAMED/UPDATED
   generateRefreshToken, // <-- ADDED
 } from "../utils/generateToken.js";
 import { userSchema, loginSchema } from "../utils/validateInputs.js";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+
 import { Session } from "../models/sessionModel.js";
 
 dotenv.config();
@@ -70,7 +71,7 @@ export const registerUser = async (
     const typedUser = asTypedUser(newUser);
 
     const token = generateToken(typedUser._id.toString());
-const decoded = jwt.decode(token) as { exp?: number } | null;
+const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { exp?: number };
 
 if (!decoded || !decoded.exp) {
   throw new Error("Invalid token format or missing expiration");
