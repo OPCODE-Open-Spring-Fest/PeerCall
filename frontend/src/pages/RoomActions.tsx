@@ -20,9 +20,11 @@ export default function RoomActions() {
       try {
         const res = await axios.get("http://localhost:3000/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         });
         setUser(res.data.user);
       } catch (err) {
+        console.error("Failed to fetch user:", err);
         localStorage.removeItem("token");
         navigate("/signin");
       } finally {
@@ -54,7 +56,9 @@ export default function RoomActions() {
           Room Actions
         </h2>
         <p className="text-gray-600 text-center mb-8">
-          👋 Hello <span className="font-semibold">{user?.name ?? "Guest"}</span>, what would you like to do today?
+          👋 Hello{" "}
+          <span className="font-semibold">{user?.name ?? "Guest"}</span>, what
+          would you like to do today?
         </p>
 
         <div className="space-y-4">

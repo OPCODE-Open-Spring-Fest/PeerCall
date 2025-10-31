@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createRoom, listRooms, joinRoom, leaveRoom } from "../controllers/roomController.js";
+import {
+  createRoom,
+  listRooms,
+  joinRoom,
+  leaveRoom,
+  endRoom,
+} from "../controllers/roomController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = Router();
@@ -7,9 +13,10 @@ const router = Router();
 // All routes require authentication
 router.use(protect);
 
-router.post("/createRoom", createRoom);           // Create room
-router.get("/listRooms", listRooms);             // List all rooms
-router.post("/:roomId/join", joinRoom); // Join a room
-router.post("/:roomId/leave", leaveRoom); // Leave a room
+router.post("/createRoom", createRoom);
+router.get("/listRooms", listRooms);
+router.post("/:roomIdOrName/join", joinRoom);
+router.post("/:roomId/leave", leaveRoom);
+router.post("/:roomId/end", endRoom);
 
 export default router;
