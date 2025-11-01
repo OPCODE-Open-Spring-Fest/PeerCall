@@ -1,11 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { Session } from "../models/sessionModel.js"; 
+import { Session } from "../models/sessionModel.js";
 
 interface AuthRequest extends Request {
   userId?: string;
 }
-
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -17,10 +16,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
       });
     }
 
-   
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string) as { id: string };
 
-   
     const activeSession = await Session.findOne({ token });
     if (!activeSession) {
       return res.status(401).json({
@@ -29,7 +26,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
       });
     }
 
-    
+    // If expired then remove it
     if (activeSession.expiresAt < new Date()) {
       await Session.deleteOne({ token });
       return res.status(401).json({
