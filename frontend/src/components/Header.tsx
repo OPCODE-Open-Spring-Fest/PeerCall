@@ -36,7 +36,7 @@ function Header() {
   }, []);
 
   // Scroll to section smoothly
-  const scrollToSection = (id) => {
+  const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
