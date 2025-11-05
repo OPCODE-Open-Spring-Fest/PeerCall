@@ -10,6 +10,8 @@ import OAuthSuccess from "./pages/OAuthSuccess.js";
 import RoomActions from "./pages/RoomActions.js";
 import ErrorBoundary from "./components/ErrorBoundary.js";
 import "./index.css"
+import CreateRoom from "./pages/CreateRoom.js";
+import JoinRoom from "./pages/JoinRoom.js";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/signin" element={<SignIn />} />
           <Route path="/room-actions" element={<RoomActions />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route path="/create-room" element={<CreateRoom/>} />   {/* ✅ */}
+        <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

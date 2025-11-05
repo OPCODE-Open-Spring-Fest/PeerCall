@@ -6,15 +6,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import { Session } from "./models/sessionModel.js";
-import { ChatMessage } from "./models/chatMessageModel.js"; // <-- make sure this file exists and exports model
+import { ChatMessage } from "./models/chatMessageModel.js";
+import Room from "./models/roomModel.js"; // ✅ Import for room events
 import app from "./app.js";
 
 dotenv.config();
-
-// // ------------------- App Setup -------------------
-// const app = express();
-// app.use(express.json());
-// app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI as string;
@@ -29,25 +25,32 @@ const io = new SocketIOServer(httpServer, {
 io.on("connection", (socket) => {
   console.log(`🟢 User connected: ${socket.id}`);
 
+  // ---------------- Join Room ----------------
   socket.on("join-room", async (roomId: string, userName: string) => {
     try {
       socket.join(roomId);
       console.log(`👥 ${userName} joined room ${roomId}`);
 
-      // Fetch last 50 messages from DB
+      // Notify others
+      io.to(roomId).emit("user-joined", { userName, roomId });
+
+      // Fetch recent chat messages
       const recentMessages = await ChatMessage.find({ roomId })
         .sort({ timestamp: -1 })
         .limit(50)
         .lean();
-
-      // Send history in correct order (oldest → newest)
       socket.emit("chat-history", recentMessages.reverse());
+
+      // Update members list
+      const room = await Room.findById(roomId).populate("members", "username email");
+      io.to(roomId).emit("update-members", room?.members || []);
     } catch (error) {
       console.error(`❌ Error fetching chat history for ${roomId}:`, error);
       socket.emit("error", { message: "Failed to fetch chat history." });
     }
   });
 
+  // ---------------- Chat Message ----------------
   socket.on(
     "chat-message",
     async ({
@@ -60,7 +63,6 @@ io.on("connection", (socket) => {
       text: string;
     }) => {
       try {
-        // Save message to MongoDB
         const message = new ChatMessage({
           roomId,
           user,
@@ -69,7 +71,6 @@ io.on("connection", (socket) => {
         });
         await message.save();
 
-        // Broadcast message to everyone in the room
         io.to(roomId).emit("chat-message", {
           roomId,
           user,
@@ -85,6 +86,67 @@ io.on("connection", (socket) => {
     }
   );
 
+  // ---------------- Leave Room ----------------
+  socket.on(
+    "leave-room",
+    async ({
+      roomId,
+      userId,
+      userName,
+    }: {
+      roomId: string;
+      userId: string;
+      userName: string;
+    }) => {
+      try {
+        socket.leave(roomId);
+        console.log(`🚪 ${userName} left room ${roomId}`);
+
+        const room = await Room.findById(roomId);
+        if (room) {
+          room.members = room.members.filter((m) => m.toString() !== userId);
+          await room.save();
+
+          // Notify others
+          io.to(roomId).emit("user-left", { userName, roomId });
+
+          // Update member list
+          const updatedRoom = await Room.findById(roomId).populate(
+            "members",
+            "username email"
+          );
+          io.to(roomId).emit("update-members", updatedRoom?.members || []);
+
+          // Delete room if empty
+          if (room.members.length === 0) {
+            await Room.findByIdAndDelete(roomId);
+            io.to(roomId).emit("room-ended", { roomId, reason: "empty" });
+            io.socketsLeave(roomId);
+            console.log(`💣 Room ${roomId} deleted (empty)`);
+          }
+        }
+      } catch (error) {
+        console.error("❌ Leave room error:", error);
+      }
+    }
+  );
+
+  // ---------------- End Room (Host Only) ----------------
+  socket.on(
+    "end-room",
+    async ({ roomId, host }: { roomId: string; host: string }) => {
+      try {
+        await Room.findByIdAndDelete(roomId);
+        io.to(roomId).emit("room-ended", { roomId, endedBy: host });
+        io.socketsLeave(roomId);
+        console.log(`💥 Room ${roomId} ended by host ${host}`);
+      } catch (error) {
+        console.error("❌ End room error:", error);
+      }
+    }
+  );
+
+  // ---------------- Disconnect ----------------
   socket.on("disconnect", () => {
     console.log(`🔴 User disconnected: ${socket.id}`);
   });
@@ -103,20 +165,6 @@ mongoose
   .connect(MONGO_URI)
   .then(() => {
     console.log("🗄️  MongoDB connected successfully!");
-
-
-    // cron.schedule("0 2 * * *", async () => {
-    //   const expiryDate = new Date();
-    //   expiryDate.setDate(expiryDate.getDate() - 7);
-    //   try {
-    //     const result = await Session.deleteMany({ createdAt: { $lt: expiryDate } });
-    //     console.log(`🧹 Cleanup complete — ${result.deletedCount} expired sessions removed`);
-    //   } catch (error) {
-    //     console.error("❌ Session cleanup failed:", error);
-    //   }
-    // });
-
-
     httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📡 Socket.io real-time chat ready`);
@@ -127,14 +175,5 @@ mongoose
     process.exit(1);
   });
 
-// // ------------------- Graceful Shutdown -------------------
-// process.on("SIGINT", () => {
-//   console.log("\n🛑 Shutting down chat server...");
-//   httpServer.close(() => {
-//     console.log("✅ HTTP server closed.");
-//     mongoose.connection.close(false, () => {
-//       console.log("🗄️ MongoDB connection closed.");
-//       process.exit(0);
-//     });
-//   });
-// });
+// ------------------- Export Socket.IO -------------------
+export { io };
