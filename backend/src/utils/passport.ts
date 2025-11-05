@@ -3,7 +3,6 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import dotenv from "dotenv";
 import User, { type IUser } from "../models/userModel.js";
-import type { Document } from "mongoose";
 
 dotenv.config();
 
@@ -15,7 +14,7 @@ const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
 const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL!;
 
-//google strategy
+// Google strategy
 passport.use(
   new GoogleStrategy(
     {
@@ -58,7 +57,8 @@ passport.use(
     }
   )
 );
-//github strategy
+
+// GitHub strategy
 passport.use(
   new GitHubStrategy(
     {
@@ -109,7 +109,8 @@ passport.use(
     }
   )
 );
-// Serialize and deserialize user
+
+// Serialize / deserialize
 passport.serializeUser((user: any, done) => {
   done(null, user?._id?.toString() || undefined);
 });

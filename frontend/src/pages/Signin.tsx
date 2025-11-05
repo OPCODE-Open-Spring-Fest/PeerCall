@@ -14,12 +14,13 @@ import {
 import { InputField } from "../components/InputField";
 import { toast } from "../hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import SocialLogin from "../components/SocialLogin";
 
 interface SignInData {
   email: string;
   password: string;
 }
+
+const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,9 +36,9 @@ const SignIn = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/signin",
+        `${API_URL}/api/auth/signin`,
         { email: data.email, password: data.password },
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
 
       toast({
@@ -45,8 +46,9 @@ const SignIn = () => {
         description: response.data.message || "Login successful",
       });
 
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      const token = response.data.accessToken || response.data.token || null;
+      if (token) {
+        localStorage.setItem("token", token);
       }
 
       reset();
@@ -55,13 +57,21 @@ const SignIn = () => {
       toast({
         title: "Error",
         description:
-          error.response?.data?.message ||
-          "Login failed. Please try again.",
+          error.response?.data?.message || "Login failed. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Launch OAuth
+  const startGoogle = () => {
+    window.location.href = `${API_URL}/api/auth/google`;
+  };
+
+  const startGithub = () => {
+    window.location.href = `${API_URL}/api/auth/github`;
   };
 
   return (
@@ -125,11 +135,43 @@ const SignIn = () => {
             </Button>
           </form>
 
+          {/* OAuth Section */}
           <div className="mt-8">
             <div className="text-center text-sm text-gray-500 mb-3">
               — Or continue with —
             </div>
-            <SocialLogin />
+
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={startGoogle}
+                className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 bg-white hover:bg-gray-50 shadow-sm text-sm font-medium transition"
+                type="button"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google logo"
+                  className="w-5 h-5"
+                />
+                Google
+              </button>
+
+              <button
+                onClick={startGithub}
+                className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 bg-white hover:bg-gray-50 shadow-sm text-sm font-medium transition"
+                type="button"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/512317/github-142.svg"
+                  alt="GitHub logo"
+                  className="w-5 h-5"
+                />
+                GitHub
+              </button>
+            </div>
+
+            <p className="text-center text-xs text-gray-400 mt-3">
+              You will be redirected to the provider to complete sign-in.
+            </p>
           </div>
         </CardContent>
 
