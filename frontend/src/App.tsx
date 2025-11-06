@@ -10,30 +10,34 @@ import OAuthSuccess from "./pages/OAuthSuccess.js";
 import RoomActions from "./pages/RoomActions.js";
 import ErrorBoundary from "./components/ErrorBoundary.js";
 import "./index.css"
-import CreateRoom from "./pages/CreateRoom.js";
 import JoinRoom from "./pages/JoinRoom.js";
+import InRoom from "./pages/InRoom.js";
+import CreateRoomLobby from "./pages/CreateRoomLobby.js";
+import CreateRoom from "./pages/CreateRoom.js";
 const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/room-actions" element={<RoomActions />} />
-          <Route path="/oauth-success" element={<OAuthSuccess />} />
-          <Route path="/create-room" element={<CreateRoom/>} />   {/* ✅ */}
-        <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-      </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/room-actions" element={<RoomActions />} />
+            <Route path="/oauth-success" element={<OAuthSuccess />} />
+            <Route path="/create-room" element={<CreateRoom />} />   {/* ✅ */}
+            <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
+            <Route path="/room/:roomName" element={<InRoom />} />
+            <Route path="/lobby/:roomId" element={<CreateRoomLobby />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

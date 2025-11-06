@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IRoom extends Document {
+  _id: mongoose.Types.ObjectId;
   name: string;
   members: mongoose.Types.ObjectId[];
   host: mongoose.Types.ObjectId; // 👈 identifies who created/owns the room

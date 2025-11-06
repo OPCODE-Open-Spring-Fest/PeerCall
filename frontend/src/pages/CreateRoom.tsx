@@ -1,14 +1,14 @@
 // src/pages/CreateRoom.tsx
-import { useState } from "react";
+import { React, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/ui/button.js";
 import axios from "axios";
 
 export default function CreateRoom() {
   const [roomName, setRoomName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const API_BASE = "http://localhost:3000/api";
+  const API_BASE = "http://localhost:3000/api/rooms";
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +18,7 @@ export default function CreateRoom() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${API_BASE}/rooms/createRoom`,
+        `${API_BASE}/createRoom`,
         { name: roomName },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -27,7 +27,8 @@ export default function CreateRoom() {
       );
 
       alert("Room created successfully!");
-      navigate(`/room/${res.data._id}`); // or navigate("/room-actions")
+      navigate(`/lobby/${res.data._id}`);
+
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to create room.");
