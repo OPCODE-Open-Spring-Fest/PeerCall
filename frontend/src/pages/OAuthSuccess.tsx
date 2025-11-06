@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
+const API_URL = "http://localhost:3000";
 
 const OAuthSuccess: React.FC = () => {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const OAuthSuccess: React.FC = () => {
       try {
         const res = await fetch(`${API_URL}/api/auth/refresh`, {
           method: "GET",
-          credentials: "include", 
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",

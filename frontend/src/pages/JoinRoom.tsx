@@ -1,13 +1,14 @@
-import { useState } from "react";
+
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/button";
+import { Button } from "../components/ui/button.js";
 import axios from "axios";
 
 export default function JoinRoom() {
   const [roomName, setRoomName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const API_BASE = "http://localhost:3000/api/rooms"; // include /rooms here
+  const API_BASE = "http://localhost:3000/api/rooms";// include /rooms here
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,14 +21,15 @@ export default function JoinRoom() {
 
       const res = await axios.post(
         `${API_BASE}/${roomName}/join`,
-        {}, // empty body
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
+      // const roomName = res.data._id
       alert("Joined room successfully!");
-      navigate(`/room/${res.data._id}`);
+      navigate(`/room/${roomName}`);
     } catch (err: any) {
       console.error("Join room error:", err);
       alert(err.response?.data?.message || err.message || "Failed to join room.");
