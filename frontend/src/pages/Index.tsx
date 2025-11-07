@@ -1,9 +1,9 @@
-import Header from "../components/Header";
-import Hero from "../components/Hero";
-import Features from "../components/Features";
-import TechStack from "../components/TechStack";
-import Footer from "../components/Footer";
-import ChatOverlay from "../components/ChatOverlay";
+import Header from "../components/Header.js";
+import Hero from "../components/Hero.js";
+import Features from "../components/Features.js";
+import TechStack from "../components/TechStack.js";
+import Footer from "../components/Footer.js";
+import ChatOverlay from "../components/ChatOverlay.js";
 import "../index.css";
 
 const Index = () => {

@@ -1,20 +1,31 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button.js";
 import axios from "axios";
+import PreJoinPreview from "../components/PreJoinPreview.js";
 
 export default function JoinRoom() {
   const [roomName, setRoomName] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const API_BASE = "http://localhost:3000/api/rooms";// include /rooms here
+  const [showPreview, setShowPreview] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
-  const handleJoin = async (e: React.FormEvent) => {
+  const navigate = useNavigate();
+  const API_BASE = "http://localhost:3000/api/rooms";
+
+  // 🔹 Step 1: Handle room join initiation
+  const handleJoinClick = (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomName.trim()) return alert("Please enter a room name!");
+    // Instead of joining immediately, show preview first
+    setShowPreview(true);
+  };
 
+  // 🔹 Step 2: After preview confirmation, actually join the backend room
+  const handleConfirmJoin = async (mediaStream: MediaStream) => {
+    setStream(mediaStream);
     setLoading(true);
+
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No auth token found");
@@ -27,24 +38,36 @@ export default function JoinRoom() {
         }
       );
 
-      // const roomName = res.data._id
       alert("Joined room successfully!");
+      // Optional: Stop preview stream before entering actual call
+      mediaStream.getTracks().forEach(track => track.stop());
       navigate(`/room/${roomName}`);
     } catch (err: any) {
       console.error("Join room error:", err);
       alert(err.response?.data?.message || err.message || "Failed to join room.");
+      setShowPreview(false);
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Step 3: Conditional render — preview or join form
+  if (showPreview) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <PreJoinPreview onJoin={handleConfirmJoin} />
+      </div>
+    );
+  }
+
+  // 🔹 Step 4: Default room input form
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-8">
       <div className="max-w-md w-full bg-white/80 backdrop-blur-md shadow-xl rounded-2xl border border-green-100 p-8">
         <h2 className="text-3xl font-bold text-green-600 text-center mb-6">
           Join a Room
         </h2>
-        <form onSubmit={handleJoin} className="space-y-4">
+        <form onSubmit={handleJoinClick} className="space-y-4">
           <input
             type="text"
             value={roomName}
