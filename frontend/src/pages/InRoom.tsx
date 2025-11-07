@@ -9,13 +9,6 @@ import {
     MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { HotKeys } from "react-hotkeys";
-
-const keyMap = {
-  TOGGLE_MIC: "ctrl+m",
-  TOGGLE_VIDEO: "ctrl+v",
-  TOGGLE_CHAT: "ctrl+c",
-};
 
 const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
     const [micOn, setMicOn] = useState(true);
@@ -145,10 +138,7 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                                 Send
                             </button>
                         </div>
-                      </div>
-                    ))}
-                    <div ref={chatEndRef} />
-                  </div>
+                    </motion.div>
                 )}
             </div>
 
@@ -186,41 +176,7 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                 </button>
             </footer>
         </div>
-
-        {/* Controls */}
-        <footer className="p-4 flex justify-center gap-6 border-t border-gray-800 bg-gray-950">
-          <button
-            onClick={toggleMic}
-            className={`p-3 rounded-full ${micOn ? "bg-gray-800" : "bg-red-600"}`}
-          >
-            {micOn ? <Mic /> : <MicOff />}
-          </button>
-
-          <button
-            onClick={toggleVideo}
-            className={`p-3 rounded-full ${
-              videoOn ? "bg-gray-800" : "bg-red-600"
-            }`}
-          >
-            {videoOn ? <Video /> : <VideoOff />}
-          </button>
-
-          <button className="p-3 rounded-full bg-red-600 hover:bg-red-700">
-            <PhoneOff />
-          </button>
-
-          <button
-            onClick={toggleChat}
-            className={`p-3 rounded-full ${
-              showChat ? "bg-indigo-600" : "bg-gray-800"
-            }`}
-          >
-            <MessageSquare />
-          </button>
-        </footer>
-      </div>
-    </HotKeys>
-  );
+    );
 };
 
 export default InRoom;
