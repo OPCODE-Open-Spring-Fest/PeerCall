@@ -16,6 +16,9 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const [messages, setMessages] = useState<{ user: string; text: string; time?: string }[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.title = `${roomName} | PeerCall`;
@@ -105,6 +108,10 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
     setShowChat((prev) => !prev);
   };
 
+  useEffect(() => {
+    if(chatEndRef.current)chatEndRef.current.scrollIntoView({behavior:"smooth"});
+  },[messages,showChat]);
+
   return (
     <HotKeys keyMap={keyMap} handlers={handlers}>
       <div className="h-screen w-full bg-gray-950 text-white flex flex-col">
@@ -156,18 +163,37 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                 In-call Chat
               </div>
               <div className="flex-1 overflow-y-auto p-3 text-gray-300">
-                <p className="text-sm">No messages yet...</p>
+                {messages.length === 0 ? (
+                  <p className="text-sm">No messages yet...</p>
+                ) : (
+                  <div className="space-y-2">
+                    {messages.map((msg, idx) => (
+                      <div key={idx} className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-green-300 font-semibold">{msg.user}</span>
+                          <span className="text-xs text-gray-400">{msg.time ? new Date(msg.time).toLocaleTimeString() : ""}</span>
+                        </div>
+                        <div className="mt-1">
+                          <span className="bg-green-100 text-gray-900 rounded px-2 py-1 text-sm inline-block max-w-[85%]">{msg.text}</span>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={chatEndRef} />
+                  </div>
+                )}
               </div>
-              <div className="p-3 border-t border-gray-800 flex">
+              <form className="p-3 border-t border-gray-800 flex" onSubmit={(e) => { e.preventDefault();
+                  if (chatInput.trim() === "") return; setMessages((s) => [...s, { user: "You", text: chatInput.trim(), time: new Date().toISOString() }]); setChatInput("");
+                }}>
                 <input
                   type="text"
+                  value={chatInput}
+                  onChange={(e)=>setChatInput(e.target.value)}
                   placeholder="Type a message..."
                   className="flex-1 bg-gray-800 rounded-l-md px-3 py-2 text-sm focus:outline-none"
                 />
-                <button className="bg-indigo-600 px-4 rounded-r-md text-sm">
-                  Send
-                </button>
-              </div>
+                <button type="submit" className="bg-indigo-600 px-4 rounded-r-md text-sm">Send</button>
+              </form>
             </motion.div>
           )}
         </div>
