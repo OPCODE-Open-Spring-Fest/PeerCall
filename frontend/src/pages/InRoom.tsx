@@ -9,6 +9,8 @@ import {
     MessageSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useConnectionQuality } from "../hooks/useConnectionQuality";
+import ConnectionQualityIndicator from "../components/ConnectionQualityIndicator";
 
 const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
     const [micOn, setMicOn] = useState(true);
@@ -18,6 +20,11 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+    const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+    const connectionQualityStats = useConnectionQuality({
+        localStream,
+        peerConnection: peerConnectionRef.current,
+    });
 
     // 🔹 STEP 1: Initialize camera and mic on join
     useEffect(() => {
@@ -74,11 +81,20 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
     return (
         <div className="h-screen w-full bg-gray-950 text-white flex flex-col">
             {/* Header */}
-            <header className="p-4 border-b border-gray-800 flex justify-between items-center">
-                <h1 className="text-xl font-semibold">Room: {roomName}</h1>
-                <div className="flex items-center gap-3 text-gray-400">
-                    <Users className="w-5 h-5" />
-                    <span>2 Participants</span>
+            <header className="p-4 border-b border-gray-800/50 bg-gray-950/50 backdrop-blur-sm flex justify-between items-center">
+                <h1 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    Room: {roomName}
+                </h1>
+                <div className="flex items-center gap-4">
+                    <ConnectionQualityIndicator
+                        quality={connectionQualityStats.quality}
+                        stats={connectionQualityStats}
+                        showLabel={true}
+                    />
+                    <div className="flex items-center gap-2 text-gray-400 bg-gray-900/50 px-3 py-1.5 rounded-lg border border-gray-800/50">
+                        <Users className="w-4 h-4" />
+                        <span className="text-sm font-medium">2 Participants</span>
+                    </div>
                 </div>
             </header>
 
@@ -87,7 +103,7 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                 {/* Video Grid */}
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
                     {/* Local Video */}
-                    <div className="bg-black rounded-2xl relative">
+                    <div className="bg-black rounded-2xl relative overflow-hidden group">
                         <video
                             ref={localVideoRef}
                             autoPlay
@@ -95,22 +111,40 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                             playsInline
                             className="w-full h-full object-cover rounded-2xl"
                         />
-                        <span className="absolute bottom-2 left-2 bg-gray-800 px-2 py-1 rounded text-sm">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                        <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-sm font-medium border border-white/10 shadow-lg">
                             You
                         </span>
+                        <div className="absolute top-3 right-3">
+                            <ConnectionQualityIndicator
+                                quality={connectionQualityStats.quality}
+                                stats={connectionQualityStats}
+                                showLabel={false}
+                                compact={true}
+                            />
+                        </div>
                     </div>
 
                     {/* Remote Video */}
-                    <div className="bg-black rounded-2xl relative">
+                    <div className="bg-black rounded-2xl relative overflow-hidden group">
                         <video
                             ref={remoteVideoRef}
                             autoPlay
                             playsInline
                             className="w-full h-full object-cover rounded-2xl"
                         />
-                        <span className="absolute bottom-2 left-2 bg-gray-800 px-2 py-1 rounded text-sm">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                        <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-sm font-medium border border-white/10 shadow-lg">
                             Peer
                         </span>
+                        <div className="absolute top-3 right-3">
+                            <ConnectionQualityIndicator
+                                quality={connectionQualityStats.quality}
+                                stats={connectionQualityStats}
+                                showLabel={false}
+                                compact={true}
+                            />
+                        </div>
                     </div>
                 </div>
 
