@@ -11,9 +11,9 @@ const Index = () => {
   const currentUser = "Demo User";
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
       <Header />
-      <main>
+      <main className="bg-gray-50 dark:bg-gray-950 transition-colors">
         <Hero />
         <Features />
         <TechStack />

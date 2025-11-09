@@ -14,28 +14,37 @@ import JoinRoom from "./pages/JoinRoom.js";
 import InRoom from "./pages/InRoom.js";
 import CreateRoomLobby from "./pages/CreateRoomLobby.js";
 import CreateRoom from "./pages/CreateRoom.js";
+import { ThemeProvider } from "next-themes";
 const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/room-actions" element={<RoomActions />} />
-            <Route path="/oauth-success" element={<OAuthSuccess />} />
-            <Route path="/create-room" element={<CreateRoom />} />   {/* ✅ */}
-            <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
-            <Route path="/room/:roomName" element={<InRoom />} />
-            <Route path="/lobby/:roomId" element={<CreateRoomLobby />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ThemeProvider 
+        attribute="class" 
+        defaultTheme="light" 
+        enableSystem={false} 
+        storageKey="peercall-theme"
+        disableTransitionOnChange={false}
+      >
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/room-actions" element={<RoomActions />} />
+              <Route path="/oauth-success" element={<OAuthSuccess />} />
+              <Route path="/create-room" element={<CreateRoom />} />   {/* ✅ */}
+              <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
+              <Route path="/room/:roomName" element={<InRoom />} />
+              <Route path="/lobby/:roomId" element={<CreateRoomLobby />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

@@ -79,10 +79,10 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
     };
 
     return (
-        <div className="h-screen w-full bg-gray-950 text-white flex flex-col">
+        <div className="h-screen w-full bg-gray-950 dark:bg-gray-900 text-white flex flex-col">
             {/* Header */}
-            <header className="p-4 border-b border-gray-800/50 bg-gray-950/50 backdrop-blur-sm flex justify-between items-center">
-                <h1 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <header className="p-4 border-b border-gray-800/50 dark:border-gray-700/50 bg-gray-950/50 dark:bg-gray-900/50 backdrop-blur-sm flex justify-between items-center">
+                <h1 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
                     Room: {roomName}
                 </h1>
                 <div className="flex items-center gap-4">
@@ -91,7 +91,7 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                         stats={connectionQualityStats}
                         showLabel={true}
                     />
-                    <div className="flex items-center gap-2 text-gray-400 bg-gray-900/50 px-3 py-1.5 rounded-lg border border-gray-800/50">
+                    <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 bg-gray-900/50 dark:bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-800/50 dark:border-gray-700/50">
                         <Users className="w-4 h-4" />
                         <span className="text-sm font-medium">2 Participants</span>
                     </div>
@@ -154,21 +154,21 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
                         initial={{ x: 200, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: 200, opacity: 0 }}
-                        className="w-full md:w-80 bg-gray-900 border-l border-gray-800 flex flex-col"
+                        className="w-full md:w-80 bg-gray-900 dark:bg-gray-800 border-l border-gray-800 dark:border-gray-700 flex flex-col"
                     >
-                        <div className="p-3 border-b border-gray-800 font-medium">
+                        <div className="p-3 border-b border-gray-800 dark:border-gray-700 font-medium">
                             In-call Chat
                         </div>
-                        <div className="flex-1 overflow-y-auto p-3 text-gray-300">
+                        <div className="flex-1 overflow-y-auto p-3 text-gray-300 dark:text-gray-400">
                             <p className="text-sm">No messages yet...</p>
                         </div>
-                        <div className="p-3 border-t border-gray-800 flex">
+                        <div className="p-3 border-t border-gray-800 dark:border-gray-700 flex">
                             <input
                                 type="text"
                                 placeholder="Type a message..."
-                                className="flex-1 bg-gray-800 rounded-l-md px-3 py-2 text-sm focus:outline-none"
+                                className="flex-1 bg-gray-800 dark:bg-gray-700 rounded-l-md px-3 py-2 text-sm text-white focus:outline-none"
                             />
-                            <button className="bg-indigo-600 px-4 rounded-r-md text-sm">
+                            <button className="bg-indigo-600 dark:bg-indigo-500 px-4 rounded-r-md text-sm hover:bg-indigo-700 dark:hover:bg-indigo-600">
                                 Send
                             </button>
                         </div>
@@ -177,34 +177,34 @@ const InRoom: React.FC<{ roomName: string }> = ({ roomName }) => {
             </div>
 
             {/* Controls */}
-            <footer className="p-4 flex justify-center gap-6 border-t border-gray-800 bg-gray-950">
+            <footer className="p-4 flex justify-center gap-6 border-t border-gray-800 dark:border-gray-700 bg-gray-950 dark:bg-gray-900">
                 <button
                     onClick={handleToggleMic}
-                    className={`p-3 rounded-full ${micOn ? "bg-gray-800" : "bg-red-600"
-                        }`}
+                    className={`p-3 rounded-full ${micOn ? "bg-gray-800 dark:bg-gray-700" : "bg-red-600 dark:bg-red-500"
+                        } hover:opacity-80 transition-opacity`}
                 >
                     {micOn ? <Mic /> : <MicOff />}
                 </button>
 
                 <button
                     onClick={handleToggleVideo}
-                    className={`p-3 rounded-full ${videoOn ? "bg-gray-800" : "bg-red-600"
-                        }`}
+                    className={`p-3 rounded-full ${videoOn ? "bg-gray-800 dark:bg-gray-700" : "bg-red-600 dark:bg-red-500"
+                        } hover:opacity-80 transition-opacity`}
                 >
                     {videoOn ? <Video /> : <VideoOff />}
                 </button>
 
                 <button
                     onClick={handleEndCall}
-                    className="p-3 rounded-full bg-red-600 hover:bg-red-700"
+                    className="p-3 rounded-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
                 >
                     <PhoneOff />
                 </button>
 
                 <button
                     onClick={() => setShowChat(!showChat)}
-                    className={`p-3 rounded-full ${showChat ? "bg-indigo-600" : "bg-gray-800"
-                        }`}
+                    className={`p-3 rounded-full ${showChat ? "bg-indigo-600 dark:bg-indigo-500" : "bg-gray-800 dark:bg-gray-700"
+                        } hover:opacity-80 transition-opacity`}
                 >
                     <MessageSquare />
                 </button>

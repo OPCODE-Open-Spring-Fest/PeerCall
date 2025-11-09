@@ -99,13 +99,13 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-10 sm:px-6">
-      <Card className="w-full max-w-md bg-white/90 backdrop-blur-xl shadow-2xl border border-green-100 rounded-2xl p-6 sm:p-8 animate-fadeIn">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 dark:from-gray-900 via-white dark:via-gray-950 to-green-100 dark:to-gray-900 px-4 py-10 sm:px-6">
+      <Card className="w-full max-w-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl border border-green-100 dark:border-gray-800 rounded-2xl p-6 sm:p-8 animate-fadeIn">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-4xl font-extrabold text-green-600 tracking-tight">
+          <CardTitle className="text-4xl font-extrabold text-green-600 dark:text-green-500 tracking-tight">
             PeerCall
           </CardTitle>
-          <CardDescription className="text-gray-600 text-base">
+          <CardDescription className="text-gray-600 dark:text-gray-400 text-base">
             Create your account to get started
           </CardDescription>
         </CardHeader>
@@ -116,8 +116,8 @@ const SignUp = () => {
             <div
               className={`text-center text-sm mb-4 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isError
-                  ? "bg-red-50 text-red-600 border border-red-200"
-                  : "bg-green-50 text-green-700 border border-green-200"
+                  ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                  : "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
               }`}
             >
               {serverMessage}
@@ -185,11 +185,11 @@ const SignUp = () => {
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-3 mt-5">
-          <div className="text-sm text-gray-600 text-center">
+          <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
             Already have an account?{" "}
             <Link
               to="/signin"
-              className="text-green-600 font-medium hover:underline hover:text-green-700 transition-colors"
+              className="text-green-600 dark:text-green-500 font-medium hover:underline hover:text-green-700 dark:hover:text-green-400 transition-colors"
             >
               Sign In
             </Link>
