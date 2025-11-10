@@ -26,10 +26,10 @@ io.on("connection", (socket) => {
   console.log(`🟢 User connected: ${socket.id}`);
 
   // ---------------- Join Room ----------------
-  socket.on("join-room", async (roomId: string, userName: string) => {
-    try {
-      socket.join(roomId);
-      console.log(`👥 ${userName} joined room ${roomId}`);
+  socket.on("join-room", async ({ roomId, userName }: { roomId: string; userName: string }) => {
+  try {
+    socket.join(roomId);
+    console.log(`👥 ${userName} joined room ${roomId}`);
 
       // Notify others
       io.to(roomId).emit("user-joined", { userName, roomId });
