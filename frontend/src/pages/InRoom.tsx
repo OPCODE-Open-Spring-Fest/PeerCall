@@ -1,8 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, MessageSquare } from "lucide-react";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  PhoneOff,
+  Users,
+  MessageSquare,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { HotKeys } from "react-hotkeys";
+import { useConnectionQuality } from "../hooks/useConnectionQuality";
+import ConnectionQualityIndicator from "../components/ConnectionQualityIndicator";
+import { API_ENDPOINTS } from "../lib/apiConfig.js";
 
 const keyMap = {
   TOGGLE_MIC: "ctrl+m",
@@ -10,36 +22,67 @@ const keyMap = {
   TOGGLE_CHAT: "ctrl+c",
 };
 
-const SOCKET_URL = "http://localhost:3000";
+interface ChatMessage {
+  user: string;
+  text: string;
+  time?: string;
+}
 
-const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userName }) => {
+const InRoom: React.FC = () => {
+  const { roomName } = useParams<{ roomName: string }>();
+  const navigate = useNavigate();
+  
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(true);
   const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState<{ user: string; text: string; time?: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const [userName, setUserName] = useState("User");
+  const [participantCount, setParticipantCount] = useState(1);
 
   const socketRef = useRef<Socket | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 
+  const connectionQualityStats = useConnectionQuality({
+    localStream: mediaStreamRef.current,
+    peerConnection: peerConnectionRef.current,
+  });
+
+  // Get user name from localStorage or token
   useEffect(() => {
-    document.title = `${roomId} | PeerCall`;
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Try to get user info from token or make API call
+      // For now, use a default or extract from token
+      const storedName = localStorage.getItem("userName");
+      if (storedName) {
+        setUserName(storedName);
+      }
+    }
+  }, []);
 
-    const socket = io(SOCKET_URL);
+  // Initialize Socket.io connection
+  useEffect(() => {
+    if (!roomName) return;
+
+    document.title = `${roomName} | PeerCall`;
+
+    const socket = io(API_ENDPOINTS.SOCKET);
     socketRef.current = socket;
 
-    socket.emit("join-room", { roomId, userName });
-    console.log("🟢 Joined room:", roomId, "as", userName);
+    socket.emit("join-room", roomName, userName);
+    console.log("🟢 Joined room:", roomName, "as", userName);
 
     socket.on("chat-history", (history: any[]) => {
       setMessages(
         history.map((m) => ({
-          roomId: m.roomId,
           user: m.user,
           text: m.text,
-          time: m.timestamp,
+          time: m.timestamp || m.time,
         }))
       );
     });
@@ -47,72 +90,81 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
     socket.on("chat-message", (msg: any) => {
       setMessages((prev) => [
         ...prev,
-        { roomIduser: msg.user, text: msg.text, time: msg.timestamp || new Date().toISOString() },
+        {
+          user: msg.user,
+          text: msg.text,
+          time: msg.time || msg.timestamp || new Date().toISOString(),
+        },
       ]);
     });
 
-    socket.on("user-joined", ({ userName ,roomId}) => {
+    socket.on("user-joined", ({ userName: joinedUser, roomId }: { userName: string; roomId?: string }) => {
       setMessages((prev) => [
         ...prev,
-        { user: "System", text: `${userName} joined the room ${roomId}` },
+        { user: "System", text: `${joinedUser} joined the room` },
       ]);
+      setParticipantCount((prev) => prev + 1);
     });
 
-    socket.on("user-left", ({ userName }) => {
+    socket.on("user-left", ({ userName: leftUser }: { userName: string }) => {
       setMessages((prev) => [
         ...prev,
-        { user: "System", text: `${userName} left the room` },
+        { user: "System", text: `${leftUser} left the room` },
       ]);
+      setParticipantCount((prev) => Math.max(1, prev - 1));
+    });
+
+    socket.on("update-members", (members: any[]) => {
+      setParticipantCount(members.length || 1);
     });
 
     return () => {
-      socket.emit("leave-room", { roomId, userName });
+      socket.emit("leave-room", {
+        roomId: roomName,
+        userId: localStorage.getItem("token") || "",
+        userName,
+      });
       socket.disconnect();
     };
-  }, [roomId, userName]);
+  }, [roomName, userName]);
 
+  // Initialize media stream
   useEffect(() => {
     const initMedia = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
         mediaStreamRef.current = stream;
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+        }
         setMicOn(stream.getAudioTracks().some((t) => t.enabled));
         setVideoOn(stream.getVideoTracks().some((t) => t.enabled));
       } catch (err) {
-        console.error("Failed to get user media:", err);
+        console.error("Error accessing camera/mic:", err);
+        alert("Please allow camera and microphone permissions.");
         setMicOn(false);
         setVideoOn(false);
       }
     };
+
     initMedia();
 
     return () => {
-      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
     };
   }, []);
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim() || !socketRef.current) return;
-
-    const message = {
-      roomId,
-      user: userName,
-      text: chatInput.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    socketRef.current.emit("chat-message", message);
-    setMessages((s) => [...s, message]);
-    setChatInput("");
-  };
-
+  // Auto-scroll chat to bottom
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (showChat) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, showChat]);
 
+  // HotKeys handlers
   const handlers = {
     TOGGLE_MIC: (e: KeyboardEvent) => {
       e.preventDefault();
@@ -148,23 +200,61 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
     setVideoOn(enabled);
   };
 
+  const handleEndCall = () => {
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    socketRef.current?.disconnect();
+    navigate("/");
+  };
+
+  const sendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || !socketRef.current || !roomName) return;
+
+    const message = {
+      roomId: roomName,
+      user: userName,
+      text: chatInput.trim(),
+    };
+
+    socketRef.current.emit("chat-message", message);
+    setChatInput("");
+  };
+
+  if (!roomName) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-white">Invalid room</p>
+      </div>
+    );
+  }
+
   return (
     <HotKeys keyMap={keyMap} handlers={handlers}>
-      <div className="h-screen w-full bg-gray-950 text-white flex flex-col">
+      <div className="h-screen w-full bg-gray-950 dark:bg-gray-900 text-white flex flex-col">
         {/* Header */}
-        <header className="p-4 border-b border-gray-800 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">Room: {roomId}</h1>
-          <div className="flex items-center gap-3 text-gray-400">
-            <Users className="w-5 h-5" />
-            <span>{userName}</span>
+        <header className="p-4 border-b border-gray-800/50 dark:border-gray-700/50 bg-gray-950/50 dark:bg-gray-900/50 backdrop-blur-sm flex justify-between items-center">
+          <h1 className="text-xl font-semibold bg-gradient-to-r from-white to-gray-300 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
+            Room: {roomName}
+          </h1>
+          <div className="flex items-center gap-4">
+            <ConnectionQualityIndicator
+              quality={connectionQualityStats.quality}
+              stats={connectionQualityStats}
+              showLabel={true}
+            />
+            <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 bg-gray-900/50 dark:bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-800/50 dark:border-gray-700/50">
+              <Users className="w-4 h-4" />
+              <span className="text-sm font-medium">{participantCount} Participant{participantCount !== 1 ? "s" : ""}</span>
+            </div>
           </div>
         </header>
 
-        {/* Main Section */}
+        {/* Main Video Area */}
         <div className="flex-1 flex flex-col md:flex-row">
-          {/* Video Area */}
-          <div className="flex-1 flex justify-center items-center p-4">
-            <div className="bg-black rounded-2xl relative w-full max-w-3xl aspect-video overflow-hidden">
+          {/* Video Grid */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+            {/* Local Video */}
+            <div className="bg-black rounded-2xl relative overflow-hidden group">
               <video
                 ref={localVideoRef}
                 autoPlay
@@ -172,9 +262,40 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
                 playsInline
                 className="w-full h-full object-cover rounded-2xl"
               />
-              <span className="absolute bottom-2 left-2 bg-gray-800 px-2 py-1 rounded text-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-sm font-medium border border-white/10 shadow-lg">
                 You ({userName})
               </span>
+              <div className="absolute top-3 right-3">
+                <ConnectionQualityIndicator
+                  quality={connectionQualityStats.quality}
+                  stats={connectionQualityStats}
+                  showLabel={false}
+                  compact={true}
+                />
+              </div>
+            </div>
+
+            {/* Remote Video */}
+            <div className="bg-black rounded-2xl relative overflow-hidden group">
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover rounded-2xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-sm font-medium border border-white/10 shadow-lg">
+                Peer
+              </span>
+              <div className="absolute top-3 right-3">
+                <ConnectionQualityIndicator
+                  quality={connectionQualityStats.quality}
+                  stats={connectionQualityStats}
+                  showLabel={false}
+                  compact={true}
+                />
+              </div>
             </div>
           </div>
 
@@ -184,10 +305,12 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
               initial={{ x: 200, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 200, opacity: 0 }}
-              className="w-full md:w-80 bg-gray-900 border-l border-gray-800 flex flex-col"
+              className="w-full md:w-80 bg-gray-900 dark:bg-gray-800 border-l border-gray-800 dark:border-gray-700 flex flex-col"
             >
-              <div className="p-3 border-b border-gray-800 font-medium">In-call Chat</div>
-              <div className="flex-1 overflow-y-auto p-3 text-gray-300">
+              <div className="p-3 border-b border-gray-800 dark:border-gray-700 font-medium">
+                In-call Chat
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 text-gray-300 dark:text-gray-400">
                 {messages.length === 0 ? (
                   <p className="text-sm text-gray-500">No messages yet...</p>
                 ) : (
@@ -211,7 +334,7 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
                           </span>
                         </div>
                         <div className="mt-1">
-                          <span className="bg-green-100 text-gray-900 rounded px-2 py-1 text-sm inline-block max-w-[85%]">
+                          <span className="bg-green-100 dark:bg-green-900/30 text-gray-900 dark:text-gray-100 rounded px-2 py-1 text-sm inline-block max-w-[85%]">
                             {msg.text}
                           </span>
                         </div>
@@ -221,16 +344,18 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
                   </div>
                 )}
               </div>
-
-              <form onSubmit={sendMessage} className="p-3 border-t border-gray-800 flex">
+              <form onSubmit={sendMessage} className="p-3 border-t border-gray-800 dark:border-gray-700 flex">
                 <input
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 bg-gray-800 rounded-l-md px-3 py-2 text-sm focus:outline-none"
+                  className="flex-1 bg-gray-800 dark:bg-gray-700 rounded-l-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
-                <button type="submit" className="bg-indigo-600 px-4 rounded-r-md text-sm">
+                <button
+                  type="submit"
+                  className="bg-indigo-600 dark:bg-indigo-500 px-4 rounded-r-md text-sm hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
+                >
                   Send
                 </button>
               </form>
@@ -238,23 +363,42 @@ const InRoom: React.FC<{ roomId: string; userName: string }> = ({ roomId, userNa
           )}
         </div>
 
-        {/* Footer Controls */}
-        <footer className="p-4 flex justify-center gap-6 border-t border-gray-800 bg-gray-950">
-          <button onClick={toggleMic} className={`p-3 rounded-full ${micOn ? "bg-gray-800" : "bg-red-600"}`}>
+        {/* Controls */}
+        <footer className="p-4 flex justify-center gap-6 border-t border-gray-800 dark:border-gray-700 bg-gray-950 dark:bg-gray-900">
+          <button
+            onClick={toggleMic}
+            className={`p-3 rounded-full ${
+              micOn ? "bg-gray-800 dark:bg-gray-700" : "bg-red-600 dark:bg-red-500"
+            } hover:opacity-80 transition-opacity`}
+            title="Toggle Microphone (Ctrl+M)"
+          >
             {micOn ? <Mic /> : <MicOff />}
           </button>
 
-          <button onClick={toggleVideo} className={`p-3 rounded-full ${videoOn ? "bg-gray-800" : "bg-red-600"}`}>
+          <button
+            onClick={toggleVideo}
+            className={`p-3 rounded-full ${
+              videoOn ? "bg-gray-800 dark:bg-gray-700" : "bg-red-600 dark:bg-red-500"
+            } hover:opacity-80 transition-opacity`}
+            title="Toggle Video (Ctrl+V)"
+          >
             {videoOn ? <Video /> : <VideoOff />}
           </button>
 
-          <button className="p-3 rounded-full bg-red-600 hover:bg-red-700">
+          <button
+            onClick={handleEndCall}
+            className="p-3 rounded-full bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
+            title="End Call"
+          >
             <PhoneOff />
           </button>
 
           <button
-            onClick={() => setShowChat((prev) => !prev)}
-            className={`p-3 rounded-full ${showChat ? "bg-indigo-600" : "bg-gray-800"}`}
+            onClick={() => setShowChat(!showChat)}
+            className={`p-3 rounded-full ${
+              showChat ? "bg-indigo-600 dark:bg-indigo-500" : "bg-gray-800 dark:bg-gray-700"
+            } hover:opacity-80 transition-opacity`}
+            title="Toggle Chat (Ctrl+C)"
           >
             <MessageSquare />
           </button>
