@@ -36,16 +36,16 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-gray-50">
+    <section id="features" className="py-24 bg-gray-50 dark:bg-gray-950 transition-colors">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 animate-fade-in-up">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-gray-100">
             Powerful{" "}
-            <span className="text-green-600">
+            <span className="text-green-600 dark:text-green-500">
               Features
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Everything you need for secure, private video communication
           </p>
         </div>
@@ -54,16 +54,16 @@ const Features = () => {
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="p-8 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up"
+              className="p-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="mb-4 inline-block p-3 bg-green-100 rounded-lg group-hover:scale-110 transition-transform">
-                <feature.icon className="w-8 h-8 text-green-600" />
+              <div className="mb-4 inline-block p-3 bg-green-100 dark:bg-green-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                <feature.icon className="w-8 h-8 text-green-600 dark:text-green-500" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                 {feature.description}
               </p>
             </Card>

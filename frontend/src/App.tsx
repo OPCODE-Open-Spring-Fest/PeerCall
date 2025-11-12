@@ -14,6 +14,7 @@ import JoinRoom from "./pages/JoinRoom.js";
 import InRoom from "./pages/InRoom.js";
 import CreateRoomLobby from "./pages/CreateRoomLobby.js";
 import CreateRoom from "./pages/CreateRoom.js";
+import { ThemeProvider } from "next-themes";
 import ActiveSessions from "./pages/ActiveSessions.js";
 import InRoomWrapper from "./pages/InRoomWrapper.js";
 const queryClient = new QueryClient();
@@ -21,24 +22,32 @@ const queryClient = new QueryClient();
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/room-actions" element={<RoomActions />} />
-            <Route path="/oauth-success" element={<OAuthSuccess />} />
-            <Route path="/create-room" element={<CreateRoom />} />   {/* ✅ */}
-            <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
-            <Route path="/room/:roomName" element={<InRoomWrapper />} />
-            <Route path="/lobby/:roomId" element={<CreateRoomLobby />} />
-            <Route path="/sessions" element={<ActiveSessions />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ThemeProvider 
+        attribute="class" 
+        defaultTheme="light" 
+        enableSystem={false} 
+        storageKey="peercall-theme"
+        disableTransitionOnChange={false}
+      >
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/room-actions" element={<RoomActions />} />
+              <Route path="/oauth-success" element={<OAuthSuccess />} />
+              <Route path="/create-room" element={<CreateRoom />} />   {/* ✅ */}
+              <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
+              <Route path="/room/:roomName" element={<InRoomWrapper />} />
+              <Route path="/lobby/:roomId" element={<CreateRoomLobby />} />
+              <Route path="/sessions" element={<ActiveSessions />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

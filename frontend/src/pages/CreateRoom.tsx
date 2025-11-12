@@ -38,9 +38,9 @@ export default function CreateRoom() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4 py-8">
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-md shadow-xl rounded-2xl border border-blue-100 p-8">
-        <h2 className="text-3xl font-bold text-blue-600 text-center mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 dark:from-gray-900 via-white dark:via-gray-950 to-blue-100 dark:to-gray-900 px-4 py-8">
+      <div className="max-w-md w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-xl rounded-2xl border border-blue-100 dark:border-gray-800 p-8">
+        <h2 className="text-3xl font-bold text-blue-600 dark:text-blue-500 text-center mb-6">
           Create a Room
         </h2>
         <form onSubmit={handleCreate} className="space-y-4">
@@ -49,12 +49,12 @@ export default function CreateRoom() {
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
             placeholder="Enter room name"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500"
           />
           <Button
             type="submit"
             disabled={loading}
-            className="w-full justify-center bg-blue-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all"
+            className="w-full justify-center bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg transition-all"
           >
             {loading ? "Creating..." : "Create Room"}
           </Button>

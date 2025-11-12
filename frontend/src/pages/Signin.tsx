@@ -75,13 +75,13 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-8">
-      <Card className="w-full max-w-md bg-white/80 backdrop-blur-md shadow-xl border border-green-100 rounded-2xl p-6 animate-fadeIn">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 dark:from-gray-900 via-white dark:via-gray-950 to-green-100 dark:to-gray-900 px-4 py-8">
+      <Card className="w-full max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-xl border border-green-100 dark:border-gray-800 rounded-2xl p-6 animate-fadeIn">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-4xl font-extrabold text-green-600 tracking-tight">
+          <CardTitle className="text-4xl font-extrabold text-green-600 dark:text-green-500 tracking-tight">
             PeerCall
           </CardTitle>
-          <CardDescription className="text-gray-600 text-base">
+          <CardDescription className="text-gray-600 dark:text-gray-400 text-base">
             Sign in to continue to your account
           </CardDescription>
         </CardHeader>
@@ -137,14 +137,14 @@ const SignIn = () => {
 
           {/* OAuth Section */}
           <div className="mt-8">
-            <div className="text-center text-sm text-gray-500 mb-3">
+            <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-3">
               — Or continue with —
             </div>
 
             <div className="flex gap-3 justify-center">
               <button
                 onClick={startGoogle}
-                className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 bg-white hover:bg-gray-50 shadow-sm text-sm font-medium transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm text-sm font-medium transition"
                 type="button"
               >
                 <img
@@ -157,7 +157,7 @@ const SignIn = () => {
 
               <button
                 onClick={startGithub}
-                className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 bg-white hover:bg-gray-50 shadow-sm text-sm font-medium transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm text-sm font-medium transition"
                 type="button"
               >
                 <img
@@ -169,18 +169,18 @@ const SignIn = () => {
               </button>
             </div>
 
-            <p className="text-center text-xs text-gray-400 mt-3">
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
               You will be redirected to the provider to complete sign-in.
             </p>
           </div>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-2 mt-4">
-          <div className="text-sm text-gray-600 text-center">
-            Don’t have an account?{" "}
+          <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
+            Don't have an account?{" "}
             <Link
               to="/signup"
-              className="text-green-600 font-medium hover:underline hover:text-green-700 transition-colors"
+              className="text-green-600 dark:text-green-500 font-medium hover:underline hover:text-green-700 dark:hover:text-green-400 transition-colors"
             >
               Sign Up
             </Link>

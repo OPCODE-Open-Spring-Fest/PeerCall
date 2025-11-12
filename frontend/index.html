@@ -1,15 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" suppressHydrationWarning>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PeerCall - Secure Privacy-Respecting Video Calls</title>
+    <script>
+      // Prevent flash of unstyled content - sync with next-themes
+      (function() {
+        try {
+          const theme = localStorage.getItem('peercall-theme');
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          // Ignore errors
+        }
+      })();
+    </script>
     <meta name="description" content="Secure, privacy-respecting real-time video calls. PeerCall delivers peer-to-peer WebRTC video communication with strong authentication and session management." />
     <meta name="author" content="PeerCall" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="./src/index.css" rel="stylesheet">
   <!-- favicon (use the existing vite.svg as the icon) -->
   <link rel="icon" type="image/svg+xml" href="/vite.svg">
     <meta property="og:title" content="PeerCall - Secure Privacy-Respecting Video Calls" />
@@ -20,6 +34,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
   </body>
 </html>

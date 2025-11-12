@@ -36,33 +36,33 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gray-50 text-gray-900">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
       {/* Animated Background */}
-  <div className="absolute inset-0 bg-linear-to-br from-green-500 via-pink-200 to-blue-500 opacity-10 animate-gradient-shift bg-size-[200%_200%]" />
+  <div className="absolute inset-0 bg-linear-to-br from-green-500 via-pink-200 to-blue-500 opacity-10 dark:opacity-5 animate-gradient-shift bg-size-[200%_200%]" />
       {/* Gradient Overlay */}
-  <div className="absolute inset-0 bg-linear-to-b from-gray-50/50 via-gray-50/80 to-gray-50" />
+  <div className="absolute inset-0 bg-linear-to-b from-gray-50/50 dark:from-gray-950/50 via-gray-50/80 dark:via-gray-950/80 to-gray-50 dark:to-gray-950" />
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-center mb-24 lg:text-left animate-fade-in-up">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <span className="text-green-700">Secure</span>{" "}
-              <span className="text-gray-900">Privacy-Respecting</span>{" "}
-              <span className="text-gray-900">Video Calls</span>
+              <span className="text-green-700 dark:text-green-500">Secure</span>{" "}
+              <span className="text-gray-900 dark:text-gray-100">Privacy-Respecting</span>{" "}
+              <span className="text-gray-900 dark:text-gray-100">Video Calls</span>
             </h1>
 
-            <p className="text-xl text-gray-500 mb-8 max-w-2xl mx-auto lg:mx-0">
+            <p className="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto lg:mx-0">
               PeerCall delivers secure, peer-to-peer WebRTC video communication with strong authentication and session management. Your privacy, our priority.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button onClick={handleJoinNow} disabled={loading} className="group bg-green-700 text-white hover:bg-purple-700">
+              <Button onClick={handleJoinNow} disabled={loading} className="group bg-green-700 dark:bg-green-600 text-white hover:bg-purple-700 dark:hover:bg-purple-600">
                 {loading ? 'Checking...' : 'Join Now'}
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
 
-              <Button variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100">
+              <Button variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <Play className="mr-2 group-hover:scale-110 transition-transform" />
                 Watch Demo
               </Button>

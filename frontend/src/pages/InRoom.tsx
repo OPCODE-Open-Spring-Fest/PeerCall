@@ -1,15 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import {
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  PhoneOff,
-  Users,
-  MessageSquare,
-} from "lucide-react";
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, MessageSquare,} from "lucide-react";
 import { motion } from "framer-motion";
 import { HotKeys } from "react-hotkeys";
 import { useConnectionQuality } from "../hooks/useConnectionQuality";
@@ -21,13 +13,11 @@ const keyMap = {
   TOGGLE_VIDEO: "ctrl+v",
   TOGGLE_CHAT: "ctrl+c",
 };
-
 interface ChatMessage {
   user: string;
   text: string;
   time?: string;
 }
-
 const InRoom: React.FC = () => {
   const { roomName } = useParams<{ roomName: string }>();
   const navigate = useNavigate();

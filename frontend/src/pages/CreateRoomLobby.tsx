@@ -41,34 +41,34 @@ export default function CreateRoomLobby() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50 text-gray-600">
+            <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-600 dark:text-gray-400 transition-colors">
                 Loading room details...
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4 py-8">
-            <div className="max-w-md w-full bg-white/80 backdrop-blur-md shadow-xl rounded-2xl border border-blue-100 p-8 text-center">
-                <h1 className="text-2xl font-semibold mb-2 text-blue-700">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 dark:from-gray-900 via-white dark:via-gray-950 to-blue-100 dark:to-gray-900 px-4 py-8 transition-colors">
+            <div className="max-w-md w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-xl rounded-2xl border border-blue-100 dark:border-gray-800 p-8 text-center transition-colors">
+                <h1 className="text-2xl font-semibold mb-2 text-blue-700 dark:text-blue-500">
                     Room Created 🎉
                 </h1>
-                <p className="text-gray-500 mb-6">
+                <p className="text-gray-500 dark:text-gray-400 mb-6">
                     {roomName ? `Room: ${roomName}` : "Unnamed Room"}
                 </p>
 
-                <div className="bg-gray-100 rounded-lg p-3 text-gray-700 mb-4 break-words">
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-gray-700 dark:text-gray-300 mb-4 break-words">
                     <p className="text-sm">Room ID: {roomId}</p>
                 </div>
 
                 <Button
                     onClick={handleCopyLink}
-                    className="w-full justify-center bg-blue-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all"
+                    className="w-full justify-center bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg transition-all"
                 >
                     {copied ? "✅ Copied!" : "Copy Join Link"}
                 </Button>
 
-                <p className="text-gray-400 mt-6 text-sm">
+                <p className="text-gray-400 dark:text-gray-500 mt-6 text-sm">
                     Share this link with others so they can join your room.
                 </p>
 

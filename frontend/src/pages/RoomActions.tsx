@@ -44,18 +44,18 @@ export default function RoomActions() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100">
-        <p className="text-gray-600 text-lg animate-pulse">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 dark:from-gray-900 via-white dark:via-gray-950 to-green-100 dark:to-gray-900">
+        <p className="text-gray-600 dark:text-gray-400 text-lg animate-pulse">Loading...</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 py-8">
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-md shadow-xl rounded-2xl border border-green-100 p-8 transition-transform hover:scale-[1.01] duration-300">
-        <h2 className="text-3xl font-bold text-green-600 text-center mb-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 dark:from-gray-900 via-white dark:via-gray-950 to-green-100 dark:to-gray-900 px-4 py-8">
+      <div className="max-w-md w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-xl rounded-2xl border border-green-100 dark:border-gray-800 p-8 transition-transform hover:scale-[1.01] duration-300">
+        <h2 className="text-3xl font-bold text-green-600 dark:text-green-500 text-center mb-4">
           Room Actions
         </h2>
-        <p className="text-gray-600 text-center mb-8">
+        <p className="text-gray-600 dark:text-gray-400 text-center mb-8">
           👋 Hello{" "}
           <span className="font-semibold">{user?.name ?? "Guest"}</span>, what
           would you like to do today?
@@ -65,7 +65,7 @@ export default function RoomActions() {
           {/* Join Room */}
           <Button
             onClick={handleJoin}
-            className="w-full justify-center bg-green-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all"
+            className="w-full justify-center bg-green-600 dark:bg-green-500 text-white font-medium py-3 rounded-lg shadow-md hover:bg-green-700 dark:hover:bg-green-600 hover:shadow-lg transition-all"
           >
             <LogIn className="mr-2 h-5 w-5" /> Join a Room
           </Button>
@@ -73,7 +73,7 @@ export default function RoomActions() {
           {/* Create Room */}
           <Button
             onClick={handleCreate}
-            className="w-full justify-center bg-blue-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all"
+            className="w-full justify-center bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 rounded-lg shadow-md hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg transition-all"
           >
             <PlusSquare className="mr-2 h-5 w-5" /> Create a Room
           </Button>
@@ -81,7 +81,7 @@ export default function RoomActions() {
           {/* Logout */}
           <Button
             onClick={handleLogout}
-            className="w-full justify-center bg-red-600 text-white font-medium py-3 rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all"
+            className="w-full justify-center bg-red-600 dark:bg-red-500 text-white font-medium py-3 rounded-lg shadow-md hover:bg-red-700 dark:hover:bg-red-600 hover:shadow-lg transition-all"
           >
             <LogOut className="mr-2 h-5 w-5" /> Logout
           </Button>
