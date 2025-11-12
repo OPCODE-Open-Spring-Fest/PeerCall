@@ -14,6 +14,8 @@ import JoinRoom from "./pages/JoinRoom.js";
 import InRoom from "./pages/InRoom.js";
 import CreateRoomLobby from "./pages/CreateRoomLobby.js";
 import CreateRoom from "./pages/CreateRoom.js";
+import ActiveSessions from "./pages/ActiveSessions.js";
+import InRoomWrapper from "./pages/InRoomWrapper.js";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -31,8 +33,9 @@ const App = () => (
             <Route path="/oauth-success" element={<OAuthSuccess />} />
             <Route path="/create-room" element={<CreateRoom />} />   {/* ✅ */}
             <Route path="/join-room" element={<JoinRoom />} />       {/* ✅ */}
-            <Route path="/room/:roomName" element={<InRoom />} />
+            <Route path="/room/:roomName" element={<InRoomWrapper />} />
             <Route path="/lobby/:roomId" element={<CreateRoomLobby />} />
+            <Route path="/sessions" element={<ActiveSessions />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
