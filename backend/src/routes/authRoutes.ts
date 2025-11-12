@@ -13,6 +13,7 @@ import { generateToken, generateRefreshToken } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User, { type IUser } from "../models/userModel.js";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -67,8 +68,8 @@ router.get(
 
       // Redirect to success page on frontend
       return res.redirect(`${FRONTEND_URL}/oauth-success`);
-    } catch (err) {
-      console.error("Google callback error:", err);
+    } catch (err: any) {
+      logger.error("Google callback error:", err);
       return res.redirect(`${FRONTEND_URL}/signin`);
     }
   }
@@ -113,8 +114,8 @@ router.get(
       });
 
       return res.redirect(`${FRONTEND_URL}/oauth-success`);
-    } catch (err) {
-      console.error("GitHub callback error:", err);
+    } catch (err: any) {
+      logger.error("GitHub callback error:", err);
       return res.redirect(`${FRONTEND_URL}/signin`);
     }
   }

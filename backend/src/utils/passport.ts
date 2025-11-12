@@ -3,25 +3,27 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import dotenv from "dotenv";
 import User, { type IUser } from "../models/userModel.js";
+import logger from "./logger.js";
 
 dotenv.config();
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
-const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL!;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
-const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL!;
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL;
 
-// Google strategy
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: GOOGLE_CALLBACK_URL,
-    },
+// Google strategy - only initialize if credentials are provided
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_CALLBACK_URL) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: GOOGLE_CALLBACK_URL,
+      },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
@@ -56,17 +58,21 @@ passport.use(
       }
     }
   )
-);
+  );
+} else {
+  logger.warn("⚠️  Google OAuth not configured. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL to enable.");
+}
 
-// GitHub strategy
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: GITHUB_CLIENT_ID,
-      clientSecret: GITHUB_CLIENT_SECRET,
-      callbackURL: GITHUB_CALLBACK_URL,
-      scope: ["user:email"],
-    },
+// GitHub strategy - only initialize if credentials are provided
+if (GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET && GITHUB_CALLBACK_URL) {
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: GITHUB_CLIENT_ID,
+        clientSecret: GITHUB_CLIENT_SECRET,
+        callbackURL: GITHUB_CALLBACK_URL,
+        scope: ["user:email"],
+      },
     async (
       _accessToken: string,
       _refreshToken: string,
@@ -108,7 +114,10 @@ passport.use(
       }
     }
   )
-);
+  );
+} else {
+  logger.warn("⚠️  GitHub OAuth not configured. Set GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, and GITHUB_CALLBACK_URL to enable.");
+}
 
 // Serialize / deserialize
 passport.serializeUser((user: any, done) => {

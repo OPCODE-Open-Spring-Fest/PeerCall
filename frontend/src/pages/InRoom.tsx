@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { HotKeys } from "react-hotkeys";
 import { useConnectionQuality } from "../hooks/useConnectionQuality";
 import ConnectionQualityIndicator from "../components/ConnectionQualityIndicator";
-import { API_ENDPOINTS } from "../lib/apiConfig.js";
+import { API_ENDPOINTS } from "../lib/apiConfig";
 
 const keyMap = {
   TOGGLE_MIC: "ctrl+m",
