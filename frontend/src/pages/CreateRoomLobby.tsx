@@ -29,7 +29,7 @@ export default function CreateRoomLobby() {
             }
         };
         fetchRoom();
-    }, [roomId]);
+    }, [roomId,roomName]);
 
     // Copy join link to clipboard
     const handleCopyLink = () => {
@@ -73,8 +73,8 @@ export default function CreateRoomLobby() {
                 </p>
 
                 <Button
-                    onClick={() => navigate(`/room/${roomId}`)}
-                    className="mt-6 w-full bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white font-medium py-3 rounded-lg shadow-md transition-all"
+                    onClick={() => navigate(`/room/${roomName}`)}
+                    className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg shadow-md"
                 >
                     Go to Room
                 </Button>
