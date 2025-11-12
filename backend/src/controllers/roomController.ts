@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Room from "../models/roomModel.js";
 import type { IRoom } from "../models/roomModel.js";
 import { io } from "../server.js";
+import logger from "../utils/logger.js";
 
 // Extend Express Request with userId
 declare global {
@@ -36,9 +37,10 @@ export const createRoom = async (req: Request, res: Response) => {
     await room.save();
 
     io.emit("room-created", { roomId: room._id.toString(), name: room.name });
+    logger.info(`Room created: ${room.name} by user ${userId}`);
     res.status(201).json(room);
   } catch (error: any) {
-    console.error("Create room error:", error.message);
+    logger.error("Create room error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -47,9 +49,10 @@ export const createRoom = async (req: Request, res: Response) => {
 export const listRooms = async (_req: Request, res: Response) => {
   try {
     const rooms = await Room.find({ isActive: true }).populate("members", "username email");
+    logger.debug(`Listed ${rooms.length} active rooms`);
     res.json(rooms);
   } catch (error: any) {
-    console.error("List rooms error:", error.message);
+    logger.error("List rooms error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -83,9 +86,10 @@ export const joinRoom = async (req: Request, res: Response) => {
     io.to(roomIdStr).emit("user-joined", { userId, roomId: roomIdStr });
     io.to(roomIdStr).emit("update-members", updatedRoom?.members || []);
 
+    logger.info(`User ${userId} joined room ${roomIdStr}`);
     res.json(updatedRoom);
   } catch (error: any) {
-    console.error("Join room error:", error.message);
+    logger.error("Join room error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -120,9 +124,10 @@ export const leaveRoom = async (req: Request, res: Response) => {
       io.socketsLeave(roomId);
     }
 
+    logger.info(`User ${userId} left room ${roomId}`);
     res.json({ message: "Left room successfully" });
   } catch (error: any) {
-    console.error("Leave room error:", error.message);
+    logger.error("Leave room error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -148,9 +153,10 @@ export const endRoom = async (req: Request, res: Response) => {
     io.to(roomId).emit("room-ended", { roomId, endedBy: userId });
     io.socketsLeave(roomId);
 
+    logger.info(`Room ${roomId} ended by host ${userId}`);
     res.json({ message: "Room ended successfully" });
   } catch (error: any) {
-    console.error("End room error:", error.message);
+    logger.error("End room error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

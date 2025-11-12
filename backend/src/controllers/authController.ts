@@ -9,6 +9,7 @@ import {
 import { userSchema, loginSchema } from "../utils/validateInputs.js";
 import dotenv from "dotenv";
 import { Session } from "../models/sessionModel.js";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -288,8 +289,8 @@ export const getUserProfile = async (req: Request, res: Response) => {
       success: true,
       user,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    logger.error("Error getting user profile:", error);
     res.status(500).json({
       success: false,
       message: "Server error",

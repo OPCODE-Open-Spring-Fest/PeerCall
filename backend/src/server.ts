@@ -9,6 +9,7 @@ import { Session } from "./models/sessionModel.js";
 import { ChatMessage } from "./models/chatMessageModel.js";
 import Room from "./models/roomModel.js"; // ✅ Import for room events
 import app from "./app.js";
+import logger from "./utils/logger.js";
 
 dotenv.config();
 
@@ -23,13 +24,13 @@ const io = new SocketIOServer(httpServer, {
 
 // ------------------- Socket.io Events -------------------
 io.on("connection", (socket) => {
-  console.log(`🟢 User connected: ${socket.id}`);
+  logger.info(`🟢 User connected: ${socket.id}`);
 
   // ---------------- Join Room ----------------
   socket.on("join-room", async ({ roomId, userName }: { roomId: string; userName: string }) => {
   try {
     socket.join(roomId);
-    console.log(`👥 ${userName} joined room ${roomId}`);
+    logger.info(`👥 ${userName} joined room ${roomId}`);
 
       // Notify others
       io.to(roomId).emit("user-joined", { userName, roomId });
@@ -44,8 +45,8 @@ io.on("connection", (socket) => {
       // Update members list
       const room = await Room.findById(roomId).populate("members", "username email");
       io.to(roomId).emit("update-members", room?.members || []);
-    } catch (error) {
-      console.error(`❌ Error fetching chat history for ${roomId}:`, error);
+    } catch (error: any) {
+      logger.error(`❌ Error fetching chat history for ${roomId}:`, error);
       socket.emit("error", { message: "Failed to fetch chat history." });
     }
   });
@@ -78,9 +79,9 @@ io.on("connection", (socket) => {
           time: message.timestamp,
         });
 
-        console.log(`💬 [${roomId}] ${user}: ${text}`);
-      } catch (error) {
-        console.error(`❌ Error saving message for ${roomId}:`, error);
+        logger.info(`💬 [${roomId}] ${user}: ${text}`);
+      } catch (error: any) {
+        logger.error(`❌ Error saving message for ${roomId}:`, error);
         socket.emit("error", { message: "Failed to send message." });
       }
     }
@@ -100,7 +101,7 @@ io.on("connection", (socket) => {
     }) => {
       try {
         socket.leave(roomId);
-        console.log(`🚪 ${userName} left room ${roomId}`);
+        logger.info(`🚪 ${userName} left room ${roomId}`);
 
         const room = await Room.findById(roomId);
         if (room) {
@@ -122,11 +123,11 @@ io.on("connection", (socket) => {
             await Room.findByIdAndDelete(roomId);
             io.to(roomId).emit("room-ended", { roomId, reason: "empty" });
             io.socketsLeave(roomId);
-            console.log(`💣 Room ${roomId} deleted (empty)`);
+            logger.info(`💣 Room ${roomId} deleted (empty)`);
           }
         }
-      } catch (error) {
-        console.error("❌ Leave room error:", error);
+      } catch (error: any) {
+        logger.error("❌ Leave room error:", error);
       }
     }
   );
@@ -139,16 +140,16 @@ io.on("connection", (socket) => {
         await Room.findByIdAndDelete(roomId);
         io.to(roomId).emit("room-ended", { roomId, endedBy: host });
         io.socketsLeave(roomId);
-        console.log(`💥 Room ${roomId} ended by host ${host}`);
-      } catch (error) {
-        console.error("❌ End room error:", error);
+        logger.info(`💥 Room ${roomId} ended by host ${host}`);
+      } catch (error: any) {
+        logger.error("❌ End room error:", error);
       }
     }
   );
 
-  // ---------------- Disconnect ----------------
+  // ---------------- Disconnect ---------------- 
   socket.on("disconnect", () => {
-    console.log(`🔴 User disconnected: ${socket.id}`);
+    logger.info(`🔴 User disconnected: ${socket.id}`);
   });
 });
 
@@ -164,14 +165,14 @@ app.get("/health", (req, res) => {
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    console.log("🗄️  MongoDB connected successfully!");
+    logger.info("🗄️  MongoDB connected successfully!");
     httpServer.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📡 Socket.io real-time chat ready`);
+      logger.info(`🚀 Server running on port ${PORT}`);
+      logger.info(`📡 Socket.io real-time chat ready`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err);
+    logger.error("❌ MongoDB connection failed:", err);
     process.exit(1);
   });
 
