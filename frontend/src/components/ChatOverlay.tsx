@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
+import { toast } from "sonner";
 
 const SOCKET_SERVER_URL = "http://localhost:3000";
 
@@ -8,9 +9,9 @@ interface ChatOverlayProps {
   userName?: string;
 }
 
-const ChatOverlay: React.FC<ChatOverlayProps> = ({ 
-  roomId = "global", 
-  userName = "Anonymous" 
+const ChatOverlay: React.FC<ChatOverlayProps> = ({
+  roomId = "global",
+  userName = "Anonymous"
 }) => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<{ user: string; text: string; time?: Date }[]>([]);
@@ -25,7 +26,11 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
     socketRef.current.on("chat-message", (msg) => {
       setMessages((prev) => [...prev, msg]);
       if (!open) {
-        setUnreadCount(prev => prev + 1);
+        setUnreadCount((prev) => prev + 1);
+        toast.info(`New message from ${msg.user}`, {
+          description: msg.text,
+          duration: 2500,
+        });
       }
     });
     socketRef.current.on("chat-history", (history) => {
@@ -53,6 +58,9 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
     if (input.trim() === "" || !socketRef.current) return;
     const msg = { roomId, user: userName, text: input };
     socketRef.current.emit("chat-message", msg);
+    toast.success("Message sent!", {
+      duration: 1200,
+    });
     setInput("");
   };
 
@@ -61,7 +69,10 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
       {!open && (
         <button
           className="fixed bottom-6 right-6 bg-green-600 dark:bg-green-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:bg-green-700 dark:hover:bg-green-600 transition-all z-50"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            toast("Chat opened.");
+          }}
           aria-label="Open chat"
         >
           💬
@@ -75,8 +86,16 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
       {open && (
         <div className="fixed bottom-6 right-6 w-80 max-w-[90vw] bg-white dark:bg-gray-900 shadow-2xl rounded-xl flex flex-col z-50 animate-fade-in-up border border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-            <span className="font-semibold text-gray-900 dark:text-gray-100">In-Call Chat - {roomId}</span>
-            <button onClick={() => setOpen(false)} className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500">
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
+              In-Call Chat - {roomId}
+            </span>
+            <button
+              onClick={() => {
+                setOpen(false);
+                toast("Chat closed.");
+              }}
+              className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500"
+            >
               ×
             </button>
           </div>
@@ -84,9 +103,13 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
             {messages.map((msg, idx) => (
               <div key={idx} className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-green-700 dark:text-green-400 font-bold">{msg.user}</span>
+                  <span className="text-xs text-green-700 dark:text-green-400 font-bold">
+                    {msg.user}
+                  </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {msg.time ? new Date(msg.time).toLocaleTimeString() : ""}
+                    {msg.time
+                      ? new Date(msg.time).toLocaleTimeString()
+                      : ""}
                   </span>
                 </div>
                 <span className="bg-green-100 dark:bg-green-900/30 text-gray-900 dark:text-gray-100 rounded px-2 py-1 text-sm w-fit max-w-[85%]">{msg.text}</span>

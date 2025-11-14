@@ -3,10 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, MessageSquare,} from "lucide-react";
 import { motion } from "framer-motion";
-import { HotKeys } from "react-hotkeys";
-import { useConnectionQuality } from "../hooks/useConnectionQuality";
-import ConnectionQualityIndicator from "../components/ConnectionQualityIndicator";
-import { API_ENDPOINTS } from "../lib/apiConfig";
+import { HotKeys } from "react-hotkeys"; 
+import { toast } from "sonner";
+import { useConnectionQuality } from "../hooks/useConnectionQuality.js";
+import API_ENDPOINTS from "../lib/apiConfig.js";
+import ConnectionQualityIndicator from "../components/ConnectionQualityIndicator.js";
 
 const keyMap = {
   TOGGLE_MIC: "ctrl+m",
@@ -134,7 +135,7 @@ const InRoom: React.FC = () => {
         setVideoOn(stream.getVideoTracks().some((t) => t.enabled));
       } catch (err) {
         console.error("Error accessing camera/mic:", err);
-        alert("Please allow camera and microphone permissions.");
+        toast.error("Please allow camera and microphone permissions.") 
         setMicOn(false);
         setVideoOn(false);
       }

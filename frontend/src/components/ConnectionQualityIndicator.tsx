@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { WifiOff, SignalLow, SignalMedium, SignalHigh, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ConnectionQuality, ConnectionQualityStats } from "../hooks/useConnectionQuality";
+import { toast } from "sonner";
+import { ConnectionQuality, ConnectionQualityStats } from "../hooks/useConnectionQuality.js";
 
 interface ConnectionQualityIndicatorProps {
   quality: ConnectionQuality;
   stats?: ConnectionQualityStats;
   showLabel?: boolean;
   className?: string;
-  compact?: boolean; 
+  compact?: boolean;
 }
 
 const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
@@ -29,7 +30,7 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
           inactiveColor: "bg-gray-700/40",
           textColor: "text-green-500",
           label: "Excellent",
-          bars: [true, true, true, true], 
+          bars: [true, true, true, true],
         };
       case "good": // 3 bars
         return {
@@ -38,7 +39,7 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
           inactiveColor: "bg-gray-700/40",
           textColor: "text-green-400",
           label: "Good",
-          bars: [true, true, true, false], 
+          bars: [true, true, true, false],
         };
       case "fair": // 2 bars
         return {
@@ -47,7 +48,7 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
           inactiveColor: "bg-gray-700/40",
           textColor: "text-yellow-500",
           label: "Fair",
-          bars: [true, true, false, false], 
+          bars: [true, true, false, false],
         };
       case "poor": // 1 bar
         return {
@@ -56,7 +57,7 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
           inactiveColor: "bg-gray-700/40",
           textColor: "text-red-500",
           label: "Poor",
-          bars: [true, false, false, false], 
+          bars: [true, false, false, false],
         };
       default: // 0 bars
         return {
@@ -65,14 +66,40 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
           inactiveColor: "bg-gray-700/40",
           textColor: "text-gray-400",
           label: "Unknown",
-          bars: [false, false, false, false], 
+          bars: [false, false, false, false],
         };
     }
   };
 
   const config = getQualityConfig();
   const Icon = config.icon;
-  const barHeights = [6, 9, 12, 15]; 
+  const barHeights = [6, 9, 12, 15];
+
+  const prevQuality = React.useRef<ConnectionQuality | null>(null);
+  React.useEffect(() => {
+    if (prevQuality.current === quality) return;
+    prevQuality.current = quality;
+    switch (quality) {
+      case "poor":
+        toast.error("Your connection is poor. Expect lag or interruptions.", {
+          duration: 2500,
+        });
+        break;
+      case "fair":
+        toast.warning("Your connection is fair. Performance may vary.", {
+          duration: 2500,
+        });
+        break;
+      case "good":
+        toast("Your connection is good.", { duration: 2000 });
+        break;
+      case "excellent":
+        toast.success("Excellent connection!", { duration: 2000 });
+        break;
+      default:
+        toast("Connection quality unknown.", { duration: 2000 });
+    }
+  }, [quality]);
 
   const formatMetric = (value?: number, unit: string = "") => {
     if (value === undefined) return "N/A";
@@ -142,7 +169,7 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
                   className={`w-1 rounded-sm transition-all duration-200 ${
                     active ? config.barColor : config.inactiveColor
                   }`}
-                  style={{
+                  style={{ 
                     height: `${barHeights[index]}px`,
                   }}
                 />
@@ -186,9 +213,9 @@ const ConnectionQualityIndicator: React.FC<ConnectionQualityIndicatorProps> = ({
                   className={`w-1.5 rounded-sm transition-all duration-200 ${
                     active ? config.barColor : config.inactiveColor
                   }`}
-                  style={{
+                  style={{ 
                     height: `${barHeights[index]}px`,
-                  }}
+                   }}
                 />
               ))}
             </div>

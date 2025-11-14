@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button.js";
 import axios from "axios";
 import PreJoinPreview from "../components/PreJoinPreview.js";
+import { toast } from "sonner"
 
 export default function JoinRoom() {
   const [roomName, setRoomName] = useState("");
@@ -16,7 +17,11 @@ export default function JoinRoom() {
   // 🔹 Step 1: Handle room join initiation
   const handleJoinClick = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName.trim()) return alert("Please enter a room name!");
+    if (!roomName.trim()) {
+      toast.error("Please enter a room name!");
+      return;
+    }
+
     // Instead of joining immediately, show preview first
     setShowPreview(true);
   };
@@ -38,13 +43,13 @@ export default function JoinRoom() {
         }
       );
 
-      alert("Joined room successfully!");
+      toast.success("Joined room successfully!");
       // Optional: Stop preview stream before entering actual call
       mediaStream.getTracks().forEach(track => track.stop());
       navigate(`/room/${roomName}`);
     } catch (err: any) {
       console.error("Join room error:", err);
-      alert(err.response?.data?.message || err.message || "Failed to join room.");
+      toast.error(err.response?.data?.message || err.message || "Failed to join room.");
       setShowPreview(false);
     } finally {
       setLoading(false);
@@ -87,3 +92,4 @@ export default function JoinRoom() {
     </div>
   );
 }
+
