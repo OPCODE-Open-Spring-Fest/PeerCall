@@ -22,6 +22,9 @@ interface ChatMessage {
 const InRoom: React.FC = () => {
   const { roomName } = useParams<{ roomName: string }>();
   const navigate = useNavigate();
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+
 
   const [micOn, setMicOn] = useState(true);
   const [videoOn, setVideoOn] = useState(true);
@@ -233,31 +236,49 @@ const InRoom: React.FC = () => {
   }, [roomName, userName]);
 
   // Initialize media stream
-  useEffect(() => {
-    const initMedia = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
-        });
-        mediaStreamRef.current = stream;
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-        setMicOn(stream.getAudioTracks().some((t) => t.enabled));
-        setVideoOn(stream.getVideoTracks().some((t) => t.enabled));
-      } catch (err) {
-        console.error("Error accessing camera/mic:", err);
-        alert("Please allow camera and microphone permissions.");
-        setMicOn(false);
-        setVideoOn(false);
+  const initMedia = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+
+      // Success
+      setPermissionError(null);
+      setShowPermissionModal(false);
+
+      // Save stream to your refs/states
+      mediaStreamRef.current = stream;
+      setMicOn(true);
+      setVideoOn(true);
+
+      // Attach tracks, send to peer, whatever your flow is
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
       }
-    };
 
+    } catch (err: any) {
+      console.error("Error accessing camera/mic:", err);
+
+      let msg = "Camera/Microphone access was denied. Please allow permissions.";
+
+      if (err.name === "NotAllowedError") {
+        msg = "You blocked camera/mic access for this site. Please enable it from browser settings.";
+      } else if (err.name === "NotFoundError") {
+        msg = "No camera or microphone was found on your device.";
+      }
+
+      setPermissionError(msg);
+      setShowPermissionModal(true);
+
+      setMicOn(false);
+      setVideoOn(false);
+    }
+  };
+  useEffect(() => {
     initMedia();
-
-    return () => {
-      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-    };
   }, []);
+
 
   // When local media becomes available and a peer is present, ensure tracks are added
   useEffect(() => {
@@ -452,6 +473,55 @@ const InRoom: React.FC = () => {
       </div>
     );
   }
+  const permissionModal = showPermissionModal && (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-gray-900 text-white w-full max-w-md p-6 rounded-2xl shadow-xl border border-gray-700"
+      >
+        <h2 className="text-xl font-semibold mb-3">Permissions Required</h2>
+
+        <p className="text-gray-300 mb-4 text-sm leading-relaxed">
+          {permissionError}
+        </p>
+
+        {/* Instructions when user BLOCKED permissions */}
+        {permissionError?.includes("blocked") && (
+          <div className="text-sm text-gray-400 mb-4">
+            <p className="mb-2">To enable camera/mic permissions:</p>
+            <ul className="list-disc ml-5 space-y-1">
+              <li>Click the lock icon in the URL bar</li>
+              <li>Open "Site Settings"</li>
+              <li>Set Camera and Microphone to "Allow"</li>
+              <li>Reload the page</li>
+            </ul>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={() => setShowPermissionModal(false)}
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm"
+          >
+            Close
+          </button>
+
+          <button
+            onClick={() => {
+              setShowPermissionModal(false);
+              initMedia(); // 🔥 This re-triggers browser permission prompt
+            }}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+
 
   return (
     <HotKeys keyMap={keyMap} handlers={handlers}>
@@ -477,6 +547,8 @@ const InRoom: React.FC = () => {
         </header>
 
         {/* Main Video Area */}
+        {permissionModal}
+
         <div className="flex-1 flex flex-col md:flex-row">
           {/* Video Grid */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
