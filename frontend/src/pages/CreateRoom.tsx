@@ -3,6 +3,7 @@ import { React, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button.js";
 import axios from "axios";
+import { toast } from "sonner";
 
 export default function CreateRoom() {
   const [roomName, setRoomName] = useState("");
@@ -12,7 +13,7 @@ export default function CreateRoom() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName.trim()) return alert("Please enter a room name!");
+    if (!roomName.trim()) return toast.message("please enter the room name")
 
     setLoading(true);
     try {
@@ -26,12 +27,12 @@ export default function CreateRoom() {
         }
       );
 
-      alert("Room created successfully!");
+      toast.success("Room created sucessfully");
       navigate(`/lobby/${res.data._id}`);
 
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to create room.");
+      toast.error(err.response?.data?.message ||"Failed to create room.") 
     } finally {
       setLoading(false);
     }

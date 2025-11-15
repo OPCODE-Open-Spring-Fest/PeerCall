@@ -3,10 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
-import { HotKeys } from "react-hotkeys";
+import { HotKeys } from "react-hotkeys"; 
+import { toast } from "sonner";
 import { useConnectionQuality } from "../hooks/useConnectionQuality.js";
+import API_ENDPOINTS from "../lib/apiConfig.js";
 import ConnectionQualityIndicator from "../components/ConnectionQualityIndicator.js";
-import { API_ENDPOINTS } from "../lib/apiConfig.js";
 
 const keyMap = {
   TOGGLE_MIC: "ctrl+m",

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button.js";
 import axios from "axios";
 import PreJoinPreview from "../components/PreJoinPreview.js";
+import { toast } from "sonner"
 
 export default function JoinRoom() {
   const [roomName, setRoomName] = useState("");
@@ -32,11 +33,11 @@ export default function JoinRoom() {
       console.error("Media access denied:", err);
 
       if (err.name === "NotAllowedError") {
-        alert(
+        toast.error(
           "You blocked the camera/mic.\n\nPlease enable permissions:\n1. Click lock icon in URL bar\n2. Open Site Settings\n3. Set Camera & Microphone to Allow\n4. Reload the page"
         );
       } else {
-        alert("Unable to access camera/mic: " + err.message);
+        toast.error("Unable to access camera/mic: " + err.message);
       }
     }
   };
@@ -63,7 +64,9 @@ export default function JoinRoom() {
         }
       );
 
-      alert("Joined room successfully!");
+      toast.success("Joined room successfully!");
+      // Optional: Stop preview stream before entering actual call
+ 
 
       // 🛑 SAFE STOP (prevents getTracks() crash)
       mediaStream.getTracks().forEach((track) => track.stop());
@@ -71,7 +74,7 @@ export default function JoinRoom() {
       navigate(`/room/${roomName}`);
     } catch (err: any) {
       console.error("Join room error:", err);
-      alert(err.response?.data?.message || err.message || "Failed to join room.");
+      toast.error(err.response?.data?.message || err.message || "Failed to join room.");
       setShowPreview(false);
     } finally {
       setLoading(false);
@@ -116,3 +119,4 @@ export default function JoinRoom() {
     </div>
   );
 }
+
