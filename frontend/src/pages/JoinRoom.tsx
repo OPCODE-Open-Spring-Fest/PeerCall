@@ -14,15 +14,40 @@ export default function JoinRoom() {
   const API_BASE = "http://localhost:3000/api/rooms";
 
   // 🔹 Step 1: Handle room join initiation
-  const handleJoinClick = (e: React.FormEvent) => {
+  const handleJoinClick = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!roomName.trim()) return alert("Please enter a room name!");
-    // Instead of joining immediately, show preview first
-    setShowPreview(true);
+
+    // ⬇️ PREVIEW SHOULD ONLY SHOW IF MEDIA PERMISSION IS SUCCESSFUL
+    try {
+      const tempStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+
+      setStream(tempStream);
+      setShowPreview(true);
+    } catch (err: any) {
+      console.error("Media access denied:", err);
+
+      if (err.name === "NotAllowedError") {
+        alert(
+          "You blocked the camera/mic.\n\nPlease enable permissions:\n1. Click lock icon in URL bar\n2. Open Site Settings\n3. Set Camera & Microphone to Allow\n4. Reload the page"
+        );
+      } else {
+        alert("Unable to access camera/mic: " + err.message);
+      }
+    }
   };
 
   // 🔹 Step 2: After preview confirmation, actually join the backend room
   const handleConfirmJoin = async (mediaStream: MediaStream) => {
+    if (!mediaStream) {
+      alert("Camera or microphone not available!");
+      return;
+    }
+
     setStream(mediaStream);
     setLoading(true);
 
@@ -39,8 +64,10 @@ export default function JoinRoom() {
       );
 
       alert("Joined room successfully!");
-      // Optional: Stop preview stream before entering actual call
-      mediaStream.getTracks().forEach(track => track.stop());
+
+      // 🛑 SAFE STOP (prevents getTracks() crash)
+      mediaStream.getTracks().forEach((track) => track.stop());
+
       navigate(`/room/${roomName}`);
     } catch (err: any) {
       console.error("Join room error:", err);
@@ -52,10 +79,10 @@ export default function JoinRoom() {
   };
 
   // 🔹 Step 3: Conditional render — preview or join form
-  if (showPreview) {
+  if (showPreview && stream) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 dark:bg-gray-950">
-        <PreJoinPreview onJoin={handleConfirmJoin} />
+        <PreJoinPreview onJoin={handleConfirmJoin} initialStream={stream} />
       </div>
     );
   }
@@ -67,6 +94,7 @@ export default function JoinRoom() {
         <h2 className="text-3xl font-bold text-green-600 dark:text-green-500 text-center mb-6">
           Join a Room
         </h2>
+
         <form onSubmit={handleJoinClick} className="space-y-4">
           <input
             type="text"
@@ -75,6 +103,7 @@ export default function JoinRoom() {
             placeholder="Enter room name"
             className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-400 dark:focus:ring-green-500"
           />
+
           <Button
             type="submit"
             disabled={loading}
