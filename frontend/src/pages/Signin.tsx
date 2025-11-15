@@ -54,12 +54,23 @@ const SignIn = () => {
       reset();
       navigate("/"); // redirect to home/dashboard
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description:
-          error.response?.data?.message || "Login failed. Please try again.",
-        variant: "destructive",
-      });
+      // Handle rate limiting errors
+      if (error.response?.status === 429) {
+        const retryAfter = error.response?.data?.retryAfter || 15;
+        const minutes = Math.ceil(retryAfter / 60);
+        toast({
+          title: "Too Many Attempts",
+          description: `Too many login attempts. Please try again after ${minutes} minute${minutes > 1 ? 's' : ''}.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            error.response?.data?.message || "Login failed. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

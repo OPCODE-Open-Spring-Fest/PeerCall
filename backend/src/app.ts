@@ -12,6 +12,9 @@ import cors from "cors";
 dotenv.config();
 const app = express();
 
+if (process.env.TRUST_PROXY === "true") {
+  app.set("trust proxy", true);
+}
 app.use(requestLogger);
 app.use(express.json());
 app.use(cookieParser()); // <-- Add this middleware HERE
