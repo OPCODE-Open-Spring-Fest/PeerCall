@@ -14,6 +14,9 @@ import path from "path";
 dotenv.config();
 const app = express();
 
+if (process.env.TRUST_PROXY === "true") {
+  app.set("trust proxy", true);
+}
 // Required for __dirname in ES modules / TS
 // (TS compiles to CJS so this works fine)
 const __dirnameLocal = path.resolve();

@@ -83,16 +83,30 @@ const SignUp = () => {
       reset();
       setTimeout(() => navigate("/signin"), 1500);
     } catch (error: any) {
-      const msg =
-        error.response?.data?.message ||
-        "Registration failed. Please try again.";
-      toast({
-        title: "Error",
-        description: msg,
-        variant: "destructive",
-      });
-      setServerMessage(msg);
-      setIsError(true);
+      // Handle rate limiting errors
+      if (error.response?.status === 429) {
+        const retryAfter = error.response?.data?.retryAfter || 15;
+        const minutes = Math.ceil(retryAfter / 60);
+        const msg = `Too many registration attempts. Please try again after ${minutes} minute${minutes > 1 ? 's' : ''}.`;
+        toast({
+          title: "Too Many Attempts",
+          description: msg,
+          variant: "destructive",
+        });
+        setServerMessage(msg);
+        setIsError(true);
+      } else {
+        const msg =
+          error.response?.data?.message ||
+          "Registration failed. Please try again.";
+        toast({
+          title: "Error",
+          description: msg,
+          variant: "destructive",
+        });
+        setServerMessage(msg);
+        setIsError(true);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -9,6 +9,7 @@ import {
 import passport from "passport";
 import { Session } from "../models/sessionModel.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { authRateLimiter } from "../middleware/rateLimiter.js";
 import { generateToken, generateRefreshToken } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -20,9 +21,8 @@ dotenv.config();
 const router = express.Router();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-// REST endpoints
-router.post("/signup", registerUser);
-router.post("/signin", loginUser);
+router.post("/signup", authRateLimiter, registerUser);
+router.post("/signin", authRateLimiter, loginUser);
 router.post("/logout", logoutUser);
 router.get("/refresh", handleRefreshToken);
 router.get("/me", protect, getUserProfile);
