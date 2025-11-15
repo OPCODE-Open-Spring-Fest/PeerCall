@@ -10,6 +10,7 @@ import { ChatMessage } from "./models/chatMessageModel.js";
 import Room from "./models/roomModel.js"; // ✅ Import for room events
 import app from "./app.js";
 import logger from "./utils/logger.js";
+import { initializeScheduler } from "./utils/scheduler.js";
 
 dotenv.config();
 
@@ -166,6 +167,7 @@ mongoose
   .connect(MONGO_URI)
   .then(() => {
     logger.info("🗄️  MongoDB connected successfully!");
+    initializeScheduler();
     httpServer.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📡 Socket.io real-time chat ready`);
